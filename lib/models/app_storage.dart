@@ -1,13 +1,12 @@
-import 'dart:io';
-
 import 'package:amphi/models/app_storage_core.dart';
+import 'package:amphi/models/update_event.dart';
 import 'package:amphi/utils/path_utils.dart';
-import 'package:notes/channels/app_web_channel.dart';
-import 'package:notes/channels/app_web_download.dart';
-import 'package:notes/extensions/sort_extension.dart';
-import 'package:notes/models/app_state.dart';
-import 'package:notes/models/folder.dart';
-import 'package:notes/models/note.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:photos/providers/photos_provider.dart';
+
+import '../channels/app_web_channel.dart';
+import '../providers/albums_provider.dart';
+
 
 final appStorage = AppStorage.getInstance();
 
@@ -15,277 +14,123 @@ class AppStorage extends AppStorageCore {
   static final AppStorage _instance = AppStorage._internal();
   AppStorage._internal();
 
-  static AppStorage getInstance() => _instance;
-
-  late String notesPath;
   late String themesPath;
+  late String photosPath;
+  late String albumsPath;
 
-  Map<String, List<dynamic>> notes = {};
-  List<dynamic>? selectedNotes;
-
-  static List<dynamic> trashes() {
-    return getNoteList("!Trashes");
-  }
-
-  static List<dynamic> getNoteList(String location) {
-    List<dynamic>? list = getInstance().notes[location];
-    if (list != null) {
-      return list;
-    } else {
-      List<dynamic> allNotes = getAllNotes();
-      getInstance().notes[location] = getNotes(noteList: allNotes, home: location);
-      return getNotes(noteList: allNotes, home: location);
-    }
-  }
-
-  static void moveSelectedNotesToTrash(String location) {
-    for (dynamic item in appStorage.selectedNotes!) {
-      if (item is Note) {
-        item.location = "!Trashes";
-        item.deleted = DateTime.now();
-        item.save(changeModified: false);
-        AppStorage.getNoteList(location).remove(item);
-        AppStorage.trashes().add(item);
-      } else if (item is Folder) {
-        item.location = "!Trashes";
-        item.deleted = DateTime.now();
-        item.save(changeModified: false);
-        AppStorage.getNoteList(location).remove(item);
-        AppStorage.trashes().add(item);
-      }
-    }
-    appStorage.selectedNotes = null;
-  }
-
-  static void refreshNoteList(void Function(List<dynamic>) onFinished) async {
-    appWebChannel.getNotes(onSuccess: (list) {
-      for (int i = 0; i < list.length; i++) {
-        Map<String, dynamic> map = list[i];
-        String filename = map["filename"];
-        File file = File(PathUtils.join(appStorage.notesPath, filename));
-
-        if (!file.existsSync()) {
-          if (filename.endsWith(".note")) {
-            appWebChannel.downloadNote(
-                filename: filename,
-                onSuccess: (note) {
-                  AppStorage.getNoteList(note.location).add(note);
-                });
-          } else if (filename.endsWith(".folder")) {
-            appWebChannel.downloadFolder(
-                filename: filename,
-                onSuccess: (folder) {
-                  AppStorage.getNoteList(folder.location).add(folder);
-                });
-          }
-        }
-      }
-    });
-    await Future.delayed(const Duration(milliseconds: 1500));
-    List<dynamic> allNotes = getAllNotes();
-    onFinished(allNotes);
-  }
-
-  static void restoreSelectedNotes() async {
-    for (dynamic item in appStorage.selectedNotes!) {
-      if (item is Note) {
-        item.location = "";
-        item.deleted = null;
-        await item.save(changeModified: false);
-        AppStorage.getNoteList("").add(item);
-        AppStorage.trashes().remove(item);
-      } else if (item is Folder) {
-        item.location = "";
-        item.deleted = null;
-        await item.save(changeModified: false);
-        AppStorage.getNoteList("").add(item);
-        AppStorage.trashes().remove(item);
-      }
-    }
-    appState.notifySomethingChanged(() {
-      appStorage.selectedNotes = null;
-      AppStorage.getNoteList("").sortByOption();
-    });
-  }
-
-  static void replaceNote(Note note) {
-    getInstance().notes.update(note.location, (list) {
-      for (int i = 0; i < list.length; i++) {
-        dynamic item = list[i];
-        if (list[i] is Note && item.filename == note.filename) {
-          list[i] = note;
-          break;
-        }
-      }
-      return list;
-    });
-    // for(dynamic originalNote in getNoteList(note.home)) {
-    //   if(originalNote is Note && originalNote.filename == note.filename) {
-    //     originalNote = note;
-    //   }
-    // }
-  }
-
-  static void deleteSelectedNotes() async {
-    for (dynamic item in appStorage.selectedNotes!) {
-      if (item is Note) {
-        await item.delete();
-        AppStorage.trashes().remove(item);
-      } else if (item is Folder) {
-        await item.delete();
-        AppStorage.trashes().remove(item);
-      }
-    }
-    appState.notifySomethingChanged(() {
-      appStorage.selectedNotes = null;
-    });
-  }
-
-  static void notifyFolder(Folder folder) {
-    getInstance().notes.updateAll((home, list) {
-      bool notFound = true;
-      for (int i = 0; i < list.length; i++) {
-        dynamic originalItem = list[i];
-        if (originalItem is Folder) {
-          if (originalItem.filename == folder.filename) {
-            notFound = false;
-            if (originalItem.location == folder.location && folder.originalModified.isAfter(originalItem.originalModified)) {
-              list[i] = folder;
-            } else if (home != folder.location) {
-              list.removeAt(i);
-              i--;
-            }
-            break;
-          }
-        }
-      }
-      if (notFound && home == folder.location) {
-        list.add(folder);
-      }
-      list.sortByOption();
-
-      return list;
-    });
-  }
-
-  static void notifyNote(Note note) {
-    getInstance().notes.updateAll((home, list) {
-      bool notFound = true;
-      for (int i = 0; i < list.length; i++) {
-        dynamic originalItem = list[i];
-        if (originalItem is Note) {
-          if (originalItem.filename == note.filename) {
-            notFound = false;
-            if (originalItem.location == note.location && note.originalModified.isAfter(originalItem.originalModified)) {
-              list[i] = note;
-            } else if (home != note.location) {
-              list.removeAt(i);
-              i--;
-            }
-            break;
-          }
-        }
-      }
-      if (notFound && home == note.location) {
-        list.add(note);
-      }
-      list.sortByOption();
-
-      return list;
-    });
-  }
-
-  static void deleteObsoleteNotes() {
-    DateTime currentDate = DateTime.now();
-    DateTime dateBeforeDays = currentDate.subtract(Duration(days: 30));
-    for (dynamic item in trashes()) {
-      if (item is Note) {
-        if (item.deleted != null) {
-          if (item.deleted!.isBefore(dateBeforeDays)) {
-            item.delete();
-          }
-        } else {
-          item.location = "";
-          item.save(changeModified: false);
-        }
-      } else if (item is Folder) {
-        if (item.deleted != null) {
-          if (item.deleted!.isBefore(dateBeforeDays)) {
-            item.delete();
-          }
-        } else {
-          item.location = "";
-          item.save(changeModified: false);
-        }
-      }
-    }
-  }
+  static AppStorage getInstance() => _instance;
 
   @override
   void initPaths() {
     super.initPaths();
-    print(selectedUser.storagePath);
-    notesPath = "${selectedUser.storagePath}/notes";
-    themesPath = "${selectedUser.storagePath}/themes";
+    themesPath = PathUtils.join(selectedUser.storagePath, "themes");
+    photosPath = PathUtils.join(selectedUser.storagePath, "photos");
+    albumsPath = PathUtils.join(selectedUser.storagePath, "albums");
 
-    createDirectoryIfNotExists(notesPath);
     createDirectoryIfNotExists(themesPath);
+    createDirectoryIfNotExists(photosPath);
+    createDirectoryIfNotExists(albumsPath);
   }
 
-  void initNotes() {
-    notes = {};
-    List<dynamic> allNotes = getAllNotes();
+  Future<void> syncDataFromEvents(WidgetRef ref) async {
+    if (appWebChannel.token.isNotEmpty) {
+      appWebChannel.getEvents(onResponse: (updateEvents) async {
+        for (UpdateEvent updateEvent in updateEvents) {
+          syncData(updateEvent, ref);
+        }
+      });
+    }
+  }
 
-    // for(dynamic item in allNotes) {
-    //   if(item is Note && item.filename == "ibIWJ.note") {
-    //    // File file = File(item.path);
-    //    // file.writeAsString(item.toFileContent());
-    //   }
-    //   else if(item is Folder) {
-    //     //File file = File(item.path);
-    //     //file.writeAsString(item.toFileContent());
-    //   }
-    // }
+  Future<void> syncData(UpdateEvent updateEvent, WidgetRef ref) async {
+    final value = updateEvent.value;
 
-    for (dynamic folder in allNotes) {
-      if (folder is Folder) {
-        notes[folder.filename] = getNotes(noteList: allNotes, home: folder.filename);
-        notes[folder.filename]!.sortByOption();
-      }
+    switch (updateEvent.action) {
+      case UpdateEvent.uploadPhoto:
+        final photo = ref.read(photosProvider).photos.get(value);
+        await appWebChannel.downloadPhotoInfo(id: value, onSuccess: (data) {
+          photo.data = data;
+          photo.save(upload: false);
+          if(photo.deleted != null) {
+            ref.read(photosProvider.notifier).movePhotosToTrash([photo.id]);
+          }
+          else {
+            ref.read(photosProvider.notifier).insertPhoto(photo);
+          }
+        });
+        break;
+      case UpdateEvent.uploadAlbum:
+        await appWebChannel.downloadAlbum(id: value, onSuccess: (album) {
+          ref.read(albumsProvider.notifier).insertAlbum(album);
+        });
+        break;
+      case UpdateEvent.deletePhoto:
+        final photo = ref.read(photosProvider).photos.get(value);
+        await photo.delete(upload: false);
+        ref.read(photosProvider.notifier).deletePhotos([photo.id]);
+        break;
+      case UpdateEvent.deleteAlbum:
+        final album = ref.read(albumsProvider).albums.get(value);
+        await album.delete(upload: false);
+        ref.read(albumsProvider.notifier).deleteAlbums([album.id]);
+        break;
     }
 
-    notes[""] = getNotes(noteList: allNotes, home: "");
-    notes[""]!.sortByOption();
-    notes["!Trashes"] = getNotes(noteList: allNotes, home: "!Trashes");
-    notes["!Trashes"]!.sortByOption();
+    appWebChannel.acknowledgeEvent(updateEvent);
   }
 
-  static List<dynamic> getAllNotes() {
-    List<dynamic> notes = [];
+  void refreshDataWithServer(WidgetRef ref) async {
+    await appWebChannel.getItems(url: "${appWebChannel.serverAddress}/photos", onSuccess: (idList) async {
 
-    Directory directory = Directory(appStorage.notesPath);
+      for(var id in ref.read(photosProvider).idList) {
+        final photo = ref.read(photosProvider).photos.get(id);
+        appWebChannel.getSha256FromPhoto(id: id, onSuccess: (sha256) {
+          if(photo.sha256 != sha256) {
+            appWebChannel.uploadPhoto(photo: photo, ref: ref);
+          }
+        }, onFailed: (code) {
+          appWebChannel.uploadPhoto(photo: photo, ref: ref);
+        });
+      }
 
-    List<FileSystemEntity> fileList = directory.listSync();
-
-    for (FileSystemEntity file in fileList) {
-      if (file is File) {
-        if (file.path.endsWith(".note")) {
-          notes.add(Note.fromFile(file));
-        } else if (file.path.endsWith(".folder")) {
-          notes.add(Folder.fromFile(file));
+      for(var id in idList) {
+        final photo = ref.read(photosProvider).photos.get(id);
+        final valid = await photo.verifySha256();
+        if(!valid) {
+          await appWebChannel.downloadPhotoInfo(id: id, onSuccess: (data) async {
+            photo.data = data;
+            photo.getPhotoPath();
+            await photo.save(upload: false);
+            ref.read(photosProvider.notifier).insertPhoto(photo);
+            appWebChannel.downloadPhotoFile(photo: photo, ref: ref);
+          });
         }
       }
-    }
-    return notes;
+
+    });
+
+    await appWebChannel.getItems(url: "${appWebChannel.serverAddress}/photos/albums", onSuccess: (idList) async {
+
+      for(var id in ref.read(albumsProvider).idList) {
+        if(!idList.contains(id)) {
+          final album = ref.read(albumsProvider).albums[id];
+          if(album != null) {
+            await appWebChannel.uploadAlbum(album: album);
+          }
+        }
+      }
+
+      for(var id in idList) {
+        if(!ref.read(albumsProvider).idList.contains(id)) {
+          await appWebChannel.downloadAlbum(id: id, onSuccess: (album) {
+            ref.read(albumsProvider.notifier).insertAlbum(album);
+          });
+        }
+
+      }
+
+    });
+
   }
 
-  static List<dynamic> getNotes({required List<dynamic> noteList, required String home}) {
-    List<dynamic> list = [];
-    for (dynamic item in noteList) {
-      if (item.location == home) {
-        list.add(item);
-      }
-    }
-    return list;
-  }
 }

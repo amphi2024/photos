@@ -1,5 +1,4 @@
-import 'package:notes/components/note_editor/note_editing_controller.dart';
-import 'package:notes/models/folder.dart';
+import 'package:flutter/material.dart';
 
 final appState = AppState.getInstance();
 
@@ -11,13 +10,11 @@ class AppState {
 
   static AppState getInstance() => _instance;
 
-  late void Function( void Function() ) notifySomethingChanged;
- // List<String> history = [""];
-  //Folder? showingFolder;
-  List<Folder?> history = [null];
+  void Function() requestScrollToTop = () {};
 
-  late NoteEditingController noteEditingController;
+  final pageController = PageController();
 
-  double noteListScrollPosition = 0;
+  late void Function(void Function()) onSettingsChanged;
+  late void Function() onServerAddressChanged;
 
 }

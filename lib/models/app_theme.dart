@@ -1,19 +1,19 @@
 import 'dart:convert';
 import 'dart:io';
 
+import 'package:amphi/extensions/color_extension.dart';
 import 'package:flutter/material.dart';
-import 'package:notes/channels/app_web_channel.dart';
-import 'package:notes/channels/app_web_upload.dart';
-import 'package:notes/models/dark_theme.dart';
-import 'package:notes/models/light_theme.dart';
 import 'package:amphi/models/app_theme_core.dart';
+
+import 'dark_theme.dart';
+import 'light_theme.dart';
 
 class AppTheme extends AppThemeCore {
 
   static const Color white = Color.fromRGBO(255, 255, 255, 1);
   static const Color lightGray = Color.fromRGBO(245, 245, 245, 1);
   static const Color black = Color.fromRGBO(0, 0, 0, 1);
-  static const Color lightBlue = Color.fromRGBO(0, 140, 255, 1.0);
+  static const Color cherryBlossom = Color.fromRGBO(255, 44, 68, 1.0);
   static const Color skyBlue = Color.fromRGBO(70, 180, 255, 1.0);
   static const Color midnight = Color.fromRGBO(35, 35, 35, 1.0);
   static const Color inactiveGray = Color(0xFF999999);
@@ -86,7 +86,7 @@ class AppTheme extends AppThemeCore {
 
   Future<void> save({bool upload = true}) async {
     await saveFile((fileContent) {
-      appWebChannel.uploadTheme(themeFileContent: fileContent, themeFilename: filename);
+      //appWebChannel.uploadTheme(themeFileContent: fileContent, themeFilename: filename);
     });
   }
 

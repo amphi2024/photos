@@ -1,112 +1,50 @@
 import 'dart:convert';
 import 'dart:io';
 
+import 'package:amphi/models/app_web_channel_core.dart';
 import 'package:amphi/models/update_event.dart';
-import 'package:amphi/utils/path_utils.dart';
-import 'package:device_info_plus/device_info_plus.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:http/http.dart';
+import 'package:photos/models/album.dart';
 import 'package:photos/models/app_settings.dart';
 import 'package:photos/models/app_storage.dart';
+import 'package:photos/models/photo.dart';
+import 'package:photos/models/transfer.dart';
+import 'package:photos/providers/transfers_provider.dart';
 import 'package:web_socket_channel/io.dart';
-import 'package:web_socket_channel/web_socket_channel.dart';
 
 final appWebChannel = AppWebChannel.getInstance();
 
-class AppWebChannel {
+class AppWebChannel extends AppWebChannelCore {
   static final AppWebChannel _instance = AppWebChannel._internal();
 
   AppWebChannel._internal();
 
   static AppWebChannel getInstance() => _instance;
 
+  @override
+  String get serverAddress => appSettings.serverAddress;
+
+  @override
+  String get appType => "photos";
+
+  @override
+  String get token => appStorage.selectedUser.token;
+
   static const int failedToConnect = -1;
   static const int failedToAuth = -2;
-  bool connected = false;
-  WebSocketChannel? webSocketChannel;
-  List<void Function(String)> userNameUpdateListeners = [];
-  late String deviceName;
 
-  Future<void> getDeviceInfo() async {
-    final DeviceInfoPlugin deviceInfoPlugin = DeviceInfoPlugin();
-    if (Platform.isAndroid) {
-      AndroidDeviceInfo android = await deviceInfoPlugin.androidInfo;
-      deviceName = android.model;
-    } else if (Platform.isIOS) {
-      IosDeviceInfo ios = await deviceInfoPlugin.iosInfo;
-      deviceName = ios.model;
-    } else if (Platform.isWindows) {
-      WindowsDeviceInfo windows = await deviceInfoPlugin.windowsInfo;
-      deviceName = windows.computerName;
-    } else if (Platform.isMacOS) {
-      MacOsDeviceInfo mac = await deviceInfoPlugin.macOsInfo;
-      deviceName = mac.model;
-    } else if (Platform.isLinux) {
-      LinuxDeviceInfo linux = await deviceInfoPlugin.linuxInfo;
-      deviceName = linux.name;
-    }
-  }
+  late void Function(UpdateEvent) onWebSocketEvent;
 
-  void disconnectWebSocket() {
-    webSocketChannel?.sink.close();
-  }
-
+  @override
   void setupWebsocketChannel(String serverAddress) async {
     webSocketChannel = IOWebSocketChannel.connect(serverAddress, headers: {"Authorization": appStorage.selectedUser.token});
 
     webSocketChannel?.stream.listen((message) async {
       Map<String, dynamic> jsonData = jsonDecode(message);
-      UpdateEvent updateEvent =
-      UpdateEvent(action: jsonData["action"] ?? "", value: jsonData["value"] ?? "", date: DateTime.fromMillisecondsSinceEpoch(jsonData["timestamp"]).toLocal());
+      UpdateEvent updateEvent = UpdateEvent.fromJson(jsonData);
+      onWebSocketEvent(updateEvent);
 
-      switch (updateEvent.action) {
-        case UpdateEvent.uploadNote:
-          if (updateEvent.value.endsWith(".note")) {
-            appWebChannel.downloadNote(
-                filename: updateEvent.value,
-                onSuccess: (note) {
-                  for (var function in noteUpdateListeners) {
-                    function(note);
-                  }
-                });
-          } else if (updateEvent.value.endsWith(".folder")) {
-            appWebChannel.downloadFolder(
-                filename: updateEvent.value,
-                onSuccess: (folder) {
-                  for (var function in folderUpdateListeners) {
-                    function(folder);
-                  }
-                });
-          }
-          break;
-        case UpdateEvent.uploadTheme:
-          appWebChannel.downloadTheme(filename: updateEvent.value);
-          break;
-        case UpdateEvent.renameUser:
-          appStorage.selectedUser.name = updateEvent.value;
-          appStorage.saveSelectedUserInformation();
-          userNameUpdateListeners.forEach((fun) {
-            fun(updateEvent.value);
-          });
-          break;
-        case UpdateEvent.deleteNote:
-          for (dynamic item in AppStorage.trashes()) {
-            if (item is Note && item.filename == updateEvent.value) {
-              item.delete(upload: false);
-              AppStorage.trashes().remove(item);
-              break;
-            } else if (item is Folder && item.filename == updateEvent.value) {
-              item.delete(upload: false);
-              AppStorage.trashes().remove(item);
-              break;
-            }
-          }
-          break;
-        case UpdateEvent.deleteTheme:
-          File file = File(PathUtils.join(appStorage.themesPath, updateEvent.value));
-          file.delete();
-          break;
-      }
-      appWebChannel.acknowledgeEvent(updateEvent);
     }, onDone: () {
       connected = false;
     }, onError: (d) {
@@ -114,221 +52,24 @@ class AppWebChannel {
     }, cancelOnError: true);
   }
 
-  Future<void> connectWebSocket() async {
-    try {
-      if (appSettings.serverAddress.startsWith("https://")) {
-        String serverAddress = "wss://${appSettings.serverAddress.split("https://").last}/notes/sync";
-        setupWebsocketChannel(serverAddress);
-      } else if (appSettings.serverAddress.startsWith("http://")) {
-        String serverAddress = "ws://${AppSettings.getInstance().serverAddress.split("http://").last}/notes/sync";
-        setupWebsocketChannel(serverAddress);
+  void getEvents({required void Function(List<UpdateEvent>) onResponse}) async {
+    List<UpdateEvent> list = [];
+    final response = await get(
+      Uri.parse("$serverAddress/photos/events"),
+      headers: <String, String>{'Content-Type': 'application/json; charset=UTF-8', "Authorization": appWebChannel.token},
+    );
+    if (response.statusCode == HttpStatus.ok) {
+      List<dynamic> decoded = jsonDecode(utf8.decode(response.bodyBytes));
+      for (Map<String, dynamic> map in decoded) {
+        UpdateEvent updateEvent = UpdateEvent.fromJson(map);
+        list.add(updateEvent);
       }
-    } on WebSocketChannelException {
-      connected = false;
+      onResponse(list);
+    } else if (response.statusCode == HttpStatus.unauthorized) {
+      appStorage.selectedUser.token = "";
     }
   }
-
-  void postWebSocketMessage(String message) {
-    if (webSocketChannel != null) {
-      webSocketChannel?.sink.add(message);
-    } else {
-      connectWebSocket();
-      webSocketChannel?.sink.add(message);
-    }
-  }
-
-  void logout({required void Function() onLoggedOut, required void Function() onFailed}) async {
-    try {
-      final response = await get(
-        Uri.parse("${appSettings.serverAddress}/users/logout"),
-        headers: <String, String>{'Content-Type': 'application/json; charset=UTF-8', "Authorization": appStorage.selectedUser.token},
-      );
-      if (response.statusCode == 200) {
-        onLoggedOut();
-      } else {
-        onFailed();
-      }
-    } catch (e) {
-      onFailed();
-    }
-  }
-
-  void login(
-      {required String id, required String password, required void Function(String, String) onLoggedIn, required void Function(int) onFailed}) async {
-    Map<String, dynamic> data = {'id': id, 'password': password};
-
-    String postData = json.encode(data);
-
-    try {
-      final response = await post(
-        Uri.parse("${appSettings.serverAddress}/users/login"),
-        headers: <String, String>{'Content-Type': 'application/json; charset=UTF-8', "Device-Name": deviceName},
-        body: postData,
-      );
-      String responseBody = utf8.decode(response.bodyBytes);
-      String token = responseBody.split(";").first;
-      String username = responseBody.split(";").last;
-      if (token.isNotEmpty && response.statusCode == 200) {
-        onLoggedIn(username, token);
-      } else {
-        onFailed(failedToAuth);
-      }
-    } catch (e) {
-      onFailed(failedToConnect);
-    }
-  }
-
-  void register(
-      {required String id,
-        required String name,
-        required String password,
-        required void Function() onRegistered,
-        required void Function(int) onFailed}) async {
-    Map<String, dynamic> data = {'id': id, 'password': password, "name": name};
-
-    String postData = json.encode(data);
-
-    try {
-      final response = await post(
-        Uri.parse("${appSettings.serverAddress}/users"),
-        headers: <String, String>{
-          'Content-Type': 'application/json; charset=UTF-8',
-        },
-        body: postData,
-      );
-      String token = response.body;
-      if (token.isNotEmpty && response.statusCode == 200) {
-        onRegistered();
-      } else {
-        onFailed(failedToConnect);
-      }
-    } catch (e) {
-      onFailed(failedToConnect);
-    }
-  }
-
-  void changeUsername({required String name, required void Function() onSuccess, required void Function(int) onFailed}) async {
-    Map<String, dynamic> data = {"name": name};
-
-    String postData = json.encode(data);
-
-    try {
-      final response = await patch(
-        Uri.parse("${appSettings.serverAddress}/users/name"),
-        headers: <String, String>{'Content-Type': 'application/json; charset=UTF-8', "Authorization": appStorage.selectedUser.token},
-        body: postData,
-      );
-      if (response.statusCode == 200) {
-        onSuccess();
-
-        UpdateEvent updateEvent = UpdateEvent(action: "rename_user", value: name, date: DateTime.now());
-        postWebSocketMessage(updateEvent.toJson());
-      } else {
-        onFailed(failedToAuth);
-      }
-    } catch (e) {
-      onFailed(failedToConnect);
-    }
-  }
-
-  void changePassword(
-      {required String id,
-        required String password,
-        required String oldPassword,
-        required void Function() onSuccess,
-        required void Function(int) onFailed}) async {
-    Map<String, dynamic> data = {"id": id, "password": password, "old_password": oldPassword};
-
-    String postData = json.encode(data);
-
-    try {
-      final response = await patch(
-        Uri.parse("${appSettings.serverAddress}/users/${id}/password"),
-        headers: <String, String>{'Content-Type': 'application/json; charset=UTF-8'},
-        body: postData,
-      );
-      if (response.statusCode == 200) {
-        onSuccess();
-      } else if (response.statusCode == 400) {
-        onFailed(failedToAuth);
-      } else {
-        onFailed(failedToConnect);
-      }
-    } catch (e) {
-      onFailed(failedToConnect);
-    }
-  }
-
-  void getUserIds({required void Function(List<String>) onResponse, required void Function() onFailed}) async {
-    try {
-      final response = await get(Uri.parse("${appSettings.serverAddress}/users"));
-      String body = utf8.decode(response.bodyBytes);
-      List<dynamic> list = jsonDecode(body);
-      List<String> result = [];
-      for (dynamic data in list) {
-        if (data is String) {
-          result.add(data);
-        }
-      }
-      onResponse(result);
-    } catch (e) {
-      onFailed();
-    }
-  }
-
-  void getStorageInfo({required void Function(Map<String, dynamic>) onSuccess, required void Function() onFailed}) async {
-    try {
-      final response = await get(Uri.parse("${appSettings.serverAddress}/storage")).timeout(const Duration(seconds: 10));
-      if (response.statusCode == 200) {
-        onSuccess(jsonDecode(response.body));
-      } else {
-        onFailed();
-      }
-    } catch (e) {
-      onFailed();
-    }
-  }
-
-  void getNotes({void Function()? onFailed, void Function(List<dynamic>)? onSuccess}) async {
-    try {
-      final response = await get(
-        Uri.parse("${appSettings.serverAddress}/notes"),
-        headers: <String, String>{'Content-Type': 'application/json; charset=UTF-8', "Authorization": appStorage.selectedUser.token},
-      );
-      if (onSuccess != null && response.statusCode == 200) {
-        onSuccess(jsonDecode(response.body));
-      } else {
-        if (onFailed != null) {
-          onFailed();
-        }
-      }
-    } catch (e) {
-      if (onFailed != null) {
-        onFailed();
-      }
-    }
-  }
-
-  void getThemes({void Function()? onFailed, void Function(List<dynamic>)? onSuccess}) async {
-    try {
-      final response = await get(
-        Uri.parse("${appSettings.serverAddress}/notes/themes"),
-        headers: <String, String>{'Content-Type': 'application/json; charset=UTF-8', "Authorization": appStorage.selectedUser.token},
-      );
-      if (onSuccess != null && response.statusCode == 200) {
-        onSuccess(jsonDecode(response.body));
-      } else {
-        if (onFailed != null) {
-          onFailed();
-        }
-      }
-    } catch (e) {
-      if (onFailed != null) {
-        onFailed();
-      }
-    }
-  }
-
+  
   void acknowledgeEvent(UpdateEvent updateEvent) async {
     Map<String, dynamic> data = {
       'value': updateEvent.value,
@@ -338,27 +79,130 @@ class AppWebChannel {
     String postData = json.encode(data);
 
     await delete(
-      Uri.parse("${appSettings.serverAddress}/notes/events"),
+      Uri.parse("${appSettings.serverAddress}/photos/events"),
       headers: <String, String>{'Content-Type': 'application/json; charset=UTF-8', "Authorization": appStorage.selectedUser.token},
       body: postData,
     );
   }
 
-  // void getEvents({required void Function(List<UpdateEvent>) onResponse}) async {
-  //   List<UpdateEvent> list = [];
-  //   final response = await get(
-  //     Uri.parse("${AppSettings.getInstance().serverAddress}/photos/events"),
-  //     headers: <String, String>{'Content-Type': 'application/json; charset=UTF-8', "Authorization": appStorage.selectedUser.token},
-  //   );
-  //   if (response.statusCode == 200) {
-  //     List<dynamic> decoded = jsonDecode(utf8.decode(response.bodyBytes));
-  //     for (Map<String, dynamic> map in decoded) {
-  //       UpdateEvent updateEvent = UpdateEvent(action: map["action"], value: map["value"], date: DateTime.fromMillisecondsSinceEpoch( map["timestamp"]).toLocal());
-  //       list.add(updateEvent);
-  //     }
-  //     onResponse(list);
-  //   } else if (response.statusCode == 401) {
-  //     appStorage.selectedUser.token = "";
-  //   }
-  // }
+  Future<void> uploadPhotoInfo({required Photo photo}) async {
+    final updateEvent = UpdateEvent(action: UpdateEvent.uploadPhoto, value: photo.id);
+    await uploadJson(url: "$serverAddress/photos/${photo.id}/info", jsonBody: jsonEncode(photo.data), updateEvent: updateEvent);
+  }
+
+  Future<void> uploadPhoto({required Photo photo, void Function()? onSuccess, void Function(int?)? onFailed, required WidgetRef ref}) async {
+    await uploadFile(url: "$serverAddress/photos/${photo.id}", filePath: photo.photoPath, headers: {"X-File-Extension": photo.mimeType.split("/").last}, onSuccess: () {
+      ref.read(transfersProvider.notifier).removeItem(photo.id);
+      onSuccess?.call();
+    }, onFailed: (code) {
+      ref.read(transfersProvider.notifier).insertItem(Transfer(id: photo.id, title: photo.title, received: 1, total: 1, error: true, upload: true));
+      onFailed?.call(code);
+    }, onProgress: (sent, total) {
+      ref.read(transfersProvider.notifier).insertItem(Transfer(id: photo.id, title: photo.title, received: sent, total: total, upload: true));
+    });
+  }
+
+  Future<void> downloadPhotoFile({required Photo photo, void Function()? onSuccess, void Function(int?)? onFailed, required WidgetRef ref}) async {
+    await downloadFile(url: "$serverAddress/photos/${photo.id}", filePath: photo.photoPath, onSuccess: () {
+      ref.read(transfersProvider.notifier).removeItem(photo.id);
+      onSuccess?.call();
+    }, onFailed: (code) {
+      ref.read(transfersProvider.notifier).insertItem(Transfer(id: photo.id, title: photo.title, received: 1, total: 1, error: true, upload: false));
+      onFailed?.call(code);
+    }, onProgress: (received, total) {
+      ref.read(transfersProvider.notifier).insertItem(Transfer(id: photo.id, title: photo.title, received: received, total: total, upload: false));
+    });
+  }
+
+  Future<void> downloadPhotoThumbnail({required Photo photo, void Function()? onSuccess, void Function(int?)? onFailed}) async {
+    try {
+      final response = await get(
+        Uri.parse("$serverAddress/photos/${photo.id}/thumbnail"),
+        headers: <String, String>{'Content-Type': 'application/json; charset=UTF-8', "Authorization": token},
+      );
+      if (response.statusCode == 200) {
+        File file = File(photo.thumbnailPath);
+        await file.writeAsBytes(response.bodyBytes, flush: true);
+        if (onSuccess != null) {
+          onSuccess();
+        }
+      }
+      else if (onFailed != null) {
+        onFailed(response.statusCode);
+      }
+    } catch (e) {
+      if (onFailed != null) {
+        onFailed(null);
+      }
+    }
+  }
+
+  Future<void> downloadPhotoInfo({required String id, required void Function(Map<String, dynamic>) onSuccess}) async {
+    await downloadJson(
+      url: "$serverAddress/photos/$id/info",
+      onSuccess: onSuccess
+    );
+  }
+
+  Future<void> deletePhoto({required Photo photo}) async {
+    final updateEvent = UpdateEvent(action: UpdateEvent.deletePhoto, value: photo.id);
+    await simpleDelete(url: "$serverAddress/photos/${photo.id}", updateEvent: updateEvent);
+  }
+
+  Future<void> getItems({required String url, required void Function(List<String>) onSuccess, void Function(int?)? onFailed}) async {
+    try {
+      final response = await get(
+        Uri.parse(url),
+        headers: <String, String>{'Content-Type': 'application/json; charset=UTF-8', "Authorization": appWebChannel.token},
+      );
+      if (response.statusCode == 200) {
+        List<dynamic> list = jsonDecode(response.body);
+        onSuccess(list.map((item) => item as String).toList());
+      } else {
+        if (onFailed != null) {
+          onFailed(response.statusCode);
+        }
+      }
+    } catch (e) {
+      if (onFailed != null) {
+        onFailed(null);
+      }
+    }
+  }
+  
+  Future<void> uploadAlbum({required Album album}) async {
+    final updateEvent = UpdateEvent(action: UpdateEvent.uploadAlbum, value: album.id);
+    await uploadJson(url: "$serverAddress/photos/albums/${album.id}", jsonBody: jsonEncode(album.data), updateEvent: updateEvent);
+  }
+
+  Future<void> deleteAlbum({required Album album}) async {
+    final updateEvent = UpdateEvent(action: UpdateEvent.deleteAlbum, value: album.id);
+    await simpleDelete(url: "$serverAddress/photos/albums/${album.id}", updateEvent: updateEvent);
+  }
+
+  Future<void> downloadAlbum({required String id, required void Function(Album) onSuccess}) async {
+    await downloadJson(url: "$serverAddress/photos/albums/$id", onSuccess: (data) async {
+      final album = Album.fromFilename("$id.album");
+      album.data = data;
+      await album.save(upload: false);
+      onSuccess(album);
+    });
+  }
+
+  Future<void> getSha256FromPhoto({required String id, required void Function(String) onSuccess, required void Function(int?) onFailed}) async {
+    try {
+      final response = await get(
+        Uri.parse("$serverAddress/photos/$id/sha256"),
+        headers: <String, String>{'Content-Type': 'application/json; charset=UTF-8', "Authorization": token},
+      );
+      if (response.statusCode == 200) {
+        onSuccess(utf8.decode(response.bodyBytes));
+      }
+      else {
+        onFailed(response.statusCode);
+      }
+    } catch (e) {
+      onFailed(null);
+    }
+  }
 }

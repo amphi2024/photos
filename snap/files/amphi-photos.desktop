@@ -1,0 +1,9 @@
+[Desktop Entry]
+Name=Photos
+Comment=Cross-platform photos app with self-hosted sync
+Exec=amphi-photos.photos
+Icon=icon.png
+Terminal=false
+Type=Application
+Categories=Graphics;Multimedia;Viewer;
+StartupNotify=false

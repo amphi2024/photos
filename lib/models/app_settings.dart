@@ -3,10 +3,8 @@ import 'dart:convert';
 import 'dart:io';
 import 'dart:ui';
 
-import 'package:amphi/utils/path_utils.dart';
-import 'package:flutter/material.dart';
-import 'package:notes/models/app_storage.dart';
-import 'package:notes/models/app_theme.dart';
+import 'app_storage.dart';
+import 'app_theme.dart';
 
 final appSettings = AppSettings.getInstance();
 
@@ -21,83 +19,39 @@ class AppSettings {
   //     created: DateTime.now(),
   //     modified: DateTime.now()
   // );
-  AppTheme? appTheme = null;
-  late String serverAddress;
-  late bool useOwnServer;
-  late int sortOption;
-  late bool reverseSorting;
-  late bool dancingFloatingButton;
-  late bool transparentNavigationBar;
-  late bool dockedFloatingMenu;
-  Locale? locale = null;
-  late int permanentDeletionPeriod;
-  late bool floatingMenuShowing;
+  Map<String, dynamic> data = {
+    "locale": null,
+    "serverAddress": ""
+  };
+  set localeCode(value) => data["locale"] = value;
+  String? get localeCode => data["locale"];
+  Locale? locale;
+  AppTheme appTheme = AppTheme(created: DateTime.now(), modified: DateTime.now());
 
-  void setSortOption(int option) {
-    if (sortOption == option) {
-      reverseSorting = !reverseSorting;
-    }
-    sortOption = option;
-  }
+  set transparentNavigationBar(value) => data["transparentNavigationBar"] = value;
+  bool get transparentNavigationBar => data.putIfAbsent("transparentNavigationBar", () => false);
+
+  set useOwnServer(value) => data["useOwnServer"] = value;
+  bool get useOwnServer => data.putIfAbsent("useOwnServer", () => false);
+
+  set serverAddress(value) => data["serverAddress"] = value;
+  String get serverAddress => data.putIfAbsent("serverAddress", () => "");
 
   void getData() {
-    File file = File(appStorage.settingsPath);
-    if (!file.existsSync()) {
-      fragmentIndex = 0;
-      appTheme = AppTheme(created: DateTime.now(), modified: DateTime.now());
-      serverAddress = "";
-      useOwnServer = false;
-      sortOption = SORT_OPTION_MODIFIED_DATE;
-      reverseSorting = false;
-      dancingFloatingButton = true;
-      transparentNavigationBar = false;
-      dockedFloatingMenu = true;
-      permanentDeletionPeriod = 30;
-      floatingMenuShowing = true;
+    try {
+      var file = File(appStorage.settingsPath);
+      data = jsonDecode(file.readAsStringSync());
+      locale = Locale(appSettings.localeCode ?? PlatformDispatcher.instance.locale.languageCode);
+    }
+    catch(e) {
+      locale = Locale(appSettings.localeCode ?? PlatformDispatcher.instance.locale.languageCode);
       save();
-    } else {
-      String jsonString = file.readAsStringSync();
-      Map<String, dynamic> jsonData = jsonDecode(jsonString);
-      fragmentIndex = jsonData["fragmentIndex"] ?? 0;
-      String themeFilename = jsonData["theme"] ?? "!DEFAULT";
-      File themeFile = File(PathUtils.join(appStorage.themesPath, themeFilename));
-      if (themeFilename != "!DEFAULT" && themeFile.existsSync()) {
-        appTheme = AppTheme.fromFile(themeFile);
-      } else {
-        appTheme = AppTheme(created: DateTime.now(), modified: DateTime.now());
-      }
-
-      transparentNavigationBar = jsonData["iosStyleUI"] ?? false;
-      serverAddress = jsonData["serverAddress"] ?? "";
-      useOwnServer = jsonData["useOwnServer"] ?? false;
-      sortOption = jsonData["sortOption"] ?? 0;
-      reverseSorting = jsonData["reverseSorting"] ?? false;
-      if (jsonData["locale"] != null) {
-        locale = Locale(jsonData["language"]);
-      }
-      dockedFloatingMenu = jsonData["dockedFloatingMenu"] ?? true;
-      permanentDeletionPeriod = jsonData["permanentDeletionPeriod"] ?? 30;
-      floatingMenuShowing = jsonData["floatingMenuShowing"] ?? true;
     }
   }
 
   Future<void> save() async {
-    Map<String, dynamic> jsonData = {
-      "fragmentIndex": fragmentIndex,
-      "theme": appTheme!.filename,
-      "serverAddress": serverAddress,
-      "useOwnServer": useOwnServer,
-      "sortOption": sortOption,
-      "reverseSorting": reverseSorting,
-      "locale": locale?.languageCode ?? null,
-      "transparentNavigationBar": transparentNavigationBar,
-      "dockedFloatingMenu": dockedFloatingMenu,
-      "permanentDeletionPeriod": permanentDeletionPeriod,
-      "floatingMenuShowing": floatingMenuShowing
-    };
-
-    File file = File(appStorage.selectedUser.storagePath + "/settings.json");
-    file.writeAsString(jsonEncode(jsonData));
+    File file = File(appStorage.settingsPath);
+    file.writeAsString(jsonEncode(data));
   }
 }
 

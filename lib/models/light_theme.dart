@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:notes/models/app_theme.dart';
-import 'package:notes/models/app_theme_data.dart';
+import 'app_theme.dart';
+import 'app_theme_data.dart';
 
 class LightTheme extends AppThemeData {
 
@@ -8,15 +8,16 @@ class LightTheme extends AppThemeData {
       {
         super.backgroundColor = AppTheme.lightGray,
         super.textColor = AppTheme.midnight,
-        super.accentColor = AppTheme.lightBlue,
+        super.accentColor = AppTheme.cherryBlossom,
         super.inactiveColor = AppTheme.inactiveGray,
         super.noteBackgroundColor = AppTheme.white,
         super.noteTextColor = AppTheme.midnight,
         super.floatingButtonBackground = AppTheme.white,
-        super.floatingButtonIconColor = AppTheme.lightBlue,
-        super.checkBoxColor = AppTheme.lightBlue,
+        super.floatingButtonIconColor = AppTheme.cherryBlossom,
+        super.checkBoxColor = AppTheme.cherryBlossom,
         super.checkBoxCheckColor = AppTheme.white,
-        super.errorColor = AppTheme.red
+        super.errorColor = AppTheme.red,
+        super.menuBackground =  const Color.fromRGBO(235, 235, 235, 1)
       });
   ThemeData toThemeData(BuildContext context) {
     return themeData(

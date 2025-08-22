@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:amphi/models/app.dart';
-import 'package:notes/models/app_settings.dart';
-import 'package:notes/models/app_theme.dart';
+
+import 'app_theme.dart';
 
 class AppThemeData {
   Color backgroundColor;
@@ -15,19 +15,21 @@ class AppThemeData {
   Color checkBoxColor;
   Color checkBoxCheckColor;
   Color errorColor;
+  Color menuBackground;
 
   AppThemeData({
     this.backgroundColor = AppTheme.midnight,
     this.textColor = AppTheme.white,
-    this.accentColor = AppTheme.lightBlue,
+    this.accentColor = AppTheme.cherryBlossom,
     this.inactiveColor = AppTheme.inactiveGray,
     this.noteBackgroundColor = AppTheme.charCoal,
     this.noteTextColor = AppTheme.white,
     this.floatingButtonBackground = AppTheme.white,
-    this.floatingButtonIconColor = AppTheme.lightBlue,
-    this.checkBoxColor = AppTheme.lightBlue,
+    this.floatingButtonIconColor = AppTheme.cherryBlossom,
+    this.checkBoxColor = AppTheme.cherryBlossom,
     this.checkBoxCheckColor = AppTheme.white,
-    this.errorColor = AppTheme.red
+    this.errorColor = AppTheme.red,
+    this.menuBackground = AppTheme.charCoal
   });
 
   ThemeData themeData({required Brightness brightness, required BuildContext context}) {
@@ -68,7 +70,7 @@ class AppThemeData {
                   381
               ? Colors.grey.withOpacity(0.5)
               : Colors.black.withOpacity(0.5),
-      iconTheme: IconThemeData(color: accentColor, size: App.isWideScreen(context) ? 25 : 15),
+      iconTheme: IconThemeData(color: accentColor, size: App.isWideScreen(context) || App.isDesktop() ? 25 : 15),
       checkboxTheme: CheckboxThemeData(
         checkColor: WidgetStateProperty.resolveWith((states) {
           if (states.contains(WidgetState.selected)) {
@@ -89,8 +91,10 @@ class AppThemeData {
         ),
       ),
       appBarTheme: AppBarTheme(
-          backgroundColor: backgroundColor.withAlpha(245),
-          surfaceTintColor: backgroundColor.withAlpha(245),
+        backgroundColor: backgroundColor,
+        surfaceTintColor: backgroundColor,
+          // backgroundColor: backgroundColor.withAlpha(245),
+          // surfaceTintColor: backgroundColor.withAlpha(245),
           toolbarHeight: 40,
           titleSpacing: 0.0,
           iconTheme: IconThemeData(color: accentColor, size: 20)),
@@ -135,48 +139,7 @@ class AppThemeData {
           titleTextStyle: TextStyle(
               color: textColor, fontSize: 17.5, fontWeight: FontWeight.bold)),
       navigationDrawerTheme: NavigationDrawerThemeData(
-          backgroundColor: Color.fromARGB(
-              backgroundColor.alpha,
-              backgroundColor.red - 10,
-              backgroundColor.green - 10,
-              backgroundColor.blue - 10)),
+          backgroundColor: menuBackground),
     );
-  }
-}
-
-extension ThemeDataExtension on ThemeData {
-
-  ThemeData noteThemeData(BuildContext context) {
-    ThemeData themeData = Theme.of(context);
-    Color noteBackgroundColor = Theme.of(context).brightness == Brightness.light
-        ? appSettings.appTheme!.lightTheme.noteBackgroundColor
-        : appSettings.appTheme!.darkTheme.noteBackgroundColor;
-    Color noteTextColor = Theme.of(context).brightness == Brightness.light
-        ? appSettings.appTheme!.lightTheme.noteTextColor
-        : appSettings.appTheme!.darkTheme.noteTextColor;
-
-    return ThemeData(
-        scaffoldBackgroundColor: noteBackgroundColor,
-        inputDecorationTheme: Theme.of(context).inputDecorationTheme,
-        dividerColor: themeData.dividerColor,
-        focusColor: themeData.focusColor,
-        highlightColor: themeData.highlightColor,
-        textTheme: TextTheme(
-            bodyMedium: TextStyle(color: noteTextColor, fontSize: 15)),
-        appBarTheme: AppBarTheme(
-            backgroundColor: noteBackgroundColor,
-            surfaceTintColor: noteBackgroundColor,
-            toolbarHeight: 40,
-            titleSpacing: 0.0,
-            iconTheme: IconThemeData(
-                color: Theme.of(context).brightness == Brightness.light
-                    ? appSettings.appTheme!.lightTheme.accentColor
-                    : appSettings.appTheme!.darkTheme.accentColor,
-                size: 30)),
-        colorScheme: Theme.of(context).colorScheme,
-        iconTheme: IconThemeData(
-          color: themeData.iconTheme.color,
-          size: 30
-        ));
   }
 }

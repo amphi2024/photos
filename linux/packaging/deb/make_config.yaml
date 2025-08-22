@@ -1,0 +1,35 @@
+display_name: Photos
+package_name: amphi-photos
+maintainer:
+  name: Amphi
+  email: amphiprioninae2024@gmail.com
+priority: optional
+section: graphics::viewer
+installed_size: 45000
+essential: false
+icon: assets/logo/icon_512x512.png
+
+pre_dependencies:
+  - libc6 (>= 2.31)
+
+dependencies:
+  - libfuse2
+  - mpv
+  - libmimalloc2.0
+
+postinstall_scripts:
+  - echo "Installed Amphi Photos successfully"
+postuninstall_scripts:
+  - echo "Uninstalled Amphi Photos successfully"
+
+keywords:
+  - Photos
+
+generic_name: Photo Gallery
+
+categories:
+  - Graphics
+  - Multimedia
+  - Viewer
+
+startup_notify: false

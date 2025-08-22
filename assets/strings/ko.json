@@ -1,0 +1,87 @@
+{
+  "@language": "언어",
+  "@settings": "설정",
+  "@guest": "게스트",
+  "@add_account": "계정 추가",
+  "@use_my_own_server": "내 서버 사용",
+  "@photos": "사진",
+  "@library": "라이브러리",
+  "@albums": "앨범",
+  "@trash": "휴지통",
+
+  "@register": "회원가입",
+  "@login": "로그인",
+  "@who_are_you": "누구세요?",
+  "@hello": "안녕하세요!",
+  "@welcome": "반갑습니다!",
+  "@change_password": "비밀번호 변경",
+  "@change_username": "이름 변경",
+  "@remove_user": "이 기기에서 제거",
+
+  "@failed_to_connect": "서버와 연결할 수 없습니다",
+  "@failed_to_auth": "인증에 실패했습니다",
+  "@please_set_server_address": "설정으로 들어가서 서버주소를 설정하십시오",
+
+  "@dialog_title_logout": "로그아웃 하시겠습니까?",
+  "@dialog_title_delete_theme": "삭제하시겠습니까?",
+  "@dialog_title_delete_color": "삭제하시겠습니까?",
+  "@dialog_title_remove_user": "이 기기에서 유저를 제거하시겠습니까?",
+  "@dialog_title_move_to_trash_photo": "휴지통으로 옮기시겠습니까?",
+  "@dialog_title_move_to_trash_selected_photos": "선택한 사진들을 휴지통으로 옮기시겠습니까?",
+  "@dialog_title_restore_selected_photos": "복원하시겠습니까?",
+  "@dialog_title_delete_selected_photos": "선택한 사진들을 영구적으로 삭제 하시겠습니까?",
+  "@dialog_title_delete_album": "해당 앨범을 삭제하시겠습니까?",
+  "@dialog_title_remove_photos_from_album": "선택한 사진들을 앨범에서 제거하시겠습니까?",
+  "@dialog_action_yes": "네",
+  "@dialog_action_no": "아니요",
+
+  "@hint_server_address": "http(s)://your_address.com",
+  "@hint_id": "아이디",
+  "@hint_password": "비밀번호",
+  "@hint_confirm_password": "비밀번호 확인",
+  "@hint_old_password": "원래 비밀번호",
+  "@hint_username": "이름",
+  "@hint_folder_name": "이름",
+  "@hint_password_different": "입력하신 비밀번호가 서로 다릅니다",
+  "@hint_old_password_different": "원래 비밀번호가 다릅니다",
+  "@hint_input_id": "아이디를 입력하십시오",
+  "@hint_input_username": "이름을 입력하십시오",
+  "@hint_input_password": "비밀번호를 입력하십시오",
+  "@hint_input_new_password": "새 비밀번호를 입력하십시오",
+  "@hint_input_old_password": "원래 비밀번호를 입력하십시오",
+  "@id_already_taken": "이미 사용중인 아이디입니다",
+  "@hint_title": "제목",
+  "@hint_photo_note": "메모 추가하기...",
+
+  "@transparent_navigation_bar": "투명 내비게이션 바",
+
+  "@new_photo": "새 사진",
+  "@new_album": "새 앨범",
+
+  "@test_connection": "연결 테스트",
+  "@connection_failed": "서버와 연결에 실패했습니다",
+
+  "@locale_label_system": "시스템",
+
+  "@share_photo": "공유",
+  "@photo_details": "세부정보",
+  "@export_photo": "내보내기",
+  "@edit_photo_info": "정보 수정",
+  "@edit_album": "앨범 수정",
+
+  "@sort_by_title": "제목순",
+  "@sort_by_date": "날짜순",
+  "@sort_by_created": "생성 날짜순",
+  "@sort_by_modified": "수정 날짜순",
+  "@sort_by_deleted": "삭제 날짜순",
+
+  "@no_photos": "사진이 없습니다",
+  "@no_albums": "앨범이 없습니다",
+  "@no_photos_album": "앨범이 비어 있습니다",
+  "@no_photos_trash": "휴지통이 비어 있습니다",
+
+  "@video_error": "동영상을 불러오는데 실패했습니다",
+  "@upload_failed": "업로드 실패",
+  "@download_failed": "다운로드 실패"
+
+}
