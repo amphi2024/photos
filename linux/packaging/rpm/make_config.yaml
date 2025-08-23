@@ -6,11 +6,6 @@ license: APACHE
 
 icon: assets/logo/icon_512x512.png
 
-requires:
-  - libfuse2
-  - mpv
-  - libmimalloc2.0
-
 keywords:
   - Photos
 
