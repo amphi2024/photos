@@ -45,16 +45,15 @@ class AppMethodChannel extends MethodChannel {
       }
     }
     else if(Platform.isWindows) {
-      if(photo.isImage()) {
+      if (photo.isImage()) {
         Process.start(
-            r".\magick.exe",
-            ["convert", "${photo.photoPath}[0]", '-resize', '300x300', photo.thumbnailPath]
+          r'.\ffmpeg.exe',
+          ['-i', photo.photoPath, '-vf', 'scale=300:-1', photo.thumbnailPath],
         );
-      }
-      else {
+      } else {
         Process.start(
-            r".\ffmpeg.exe",
-            ['-y', '-i', photo.photoPath, "-ss", "00:00:05", "-vframes", "1", "-vf", "scale=-2:720", photo.thumbnailPath]
+          r'.\ffmpeg.exe',
+          ['-y', '-i', photo.photoPath, '-ss', '00:00:05', '-vframes', '1', '-vf', 'scale=-2:720', photo.thumbnailPath],
         );
       }
     }
