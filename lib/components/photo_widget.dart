@@ -3,8 +3,6 @@ import 'dart:io';
 import 'package:amphi/models/app.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:photos/channels/app_web_channel.dart';
-import 'package:photos/models/app_settings.dart';
 import 'package:photos/providers/photos_provider.dart';
 
 import 'video/video_player.dart';
