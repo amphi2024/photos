@@ -204,7 +204,9 @@ class Photo {
 
   Future<void> deleteThumbnail() async {
     final file = File(thumbnailPath);
-    await file.delete();
+    if(await file.exists()) {
+      await file.delete();
+    }
   }
 
 }
