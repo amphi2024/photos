@@ -30,7 +30,37 @@ class AppMethodChannel extends MethodChannel {
   }
 
   Future<void> generateThumbnail(Photo photo) async {
-   await invokeMethod("generate_thumbnail", {"file_path": photo.photoPath, "thumbnail_path": photo.thumbnailPath});
+    if(Platform.isLinux) {
+      if(photo.isImage()) {
+        Process.start(
+          "magick",
+          ["convert", "${photo.photoPath}[0]", '-resize', '300x300', photo.thumbnailPath]
+        );
+      }
+      else {
+        Process.start(
+          "ffmpeg",
+          ['-y', '-i', photo.photoPath, "-ss", "00:00:05", "-vframes", "1", "-vf", "scale=-2:720", photo.thumbnailPath]
+        );
+      }
+    }
+    else if(Platform.isWindows) {
+      if(photo.isImage()) {
+        Process.start(
+            r".\magick.exe",
+            ["convert", "${photo.photoPath}[0]", '-resize', '300x300', photo.thumbnailPath]
+        );
+      }
+      else {
+        Process.start(
+            r".\ffmpeg.exe",
+            ['-y', '-i', photo.photoPath, "-ss", "00:00:05", "-vframes", "1", "-vf", "scale=-2:720", photo.thumbnailPath]
+        );
+      }
+    }
+    else {
+      await invokeMethod("generate_thumbnail", {"file_path": photo.photoPath, "thumbnail_path": photo.thumbnailPath});
+    }
   }
 
   Future<void> getSystemVersion() async {
