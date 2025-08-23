@@ -3,7 +3,9 @@ import 'dart:io';
 import 'package:amphi/utils/path_utils.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:photos/models/app_cache.dart';
+import 'package:photos/models/app_settings.dart';
 import 'package:photos/models/app_storage.dart';
+import '../channels/app_web_channel.dart';
 import '../models/photo.dart';
 import '../models/sort_option.dart';
 
@@ -99,6 +101,16 @@ class PhotosNotifier extends StateNotifier<PhotosState> {
                 var id = PathUtils.basename(directory.path);
                 final photo = Photo.fromId(id);
                 photos[id] = photo;
+                if(!File(photo.thumbnailPath).existsSync()) {
+                  if(appSettings.useOwnServer) {
+                    appWebChannel.downloadPhotoThumbnail(photo: photo, onFailed: (code) {
+                      photo.generateThumbnail();
+                    });
+                  }
+                  else {
+                    photo.generateThumbnail();
+                  }
+                }
                 if(photo.deleted == null) {
                   photoIdList.add(photo.id);
                 }

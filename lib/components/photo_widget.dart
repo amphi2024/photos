@@ -25,14 +25,7 @@ class PhotoWidget extends ConsumerWidget {
           File(photo.thumbnailPath),
           fit: fit,
           errorBuilder: (context, error, stackTrace) {
-            if(appSettings.useOwnServer) {
-              appWebChannel.downloadPhotoThumbnail(photo: photo, onFailed: (code) {
-                photo.generateThumbnail();
-              });
-            }
-            else {
-              photo.generateThumbnail();
-            }
+            photo.deleteThumbnail();
             return Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
