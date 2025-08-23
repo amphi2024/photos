@@ -5,18 +5,234 @@
       "comment" : "Bundle name",
       "extractionState" : "extracted_with_value",
       "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "new",
-            "value" : "photos"
-          }
-        },
-        "ko" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "사진"
-          }
-        }
+         "ar" : {
+                  "stringUnit" : {
+                    "state" : "translated",
+                    "value" : "الصور"
+                  }
+                },
+                "bn" : {
+                  "stringUnit" : {
+                    "state" : "translated",
+                    "value" : "ছবি"
+                  }
+                },
+                "ca" : {
+                  "stringUnit" : {
+                    "state" : "translated",
+                    "value" : "Fotos"
+                  }
+                },
+                "cs" : {
+                  "stringUnit" : {
+                    "state" : "translated",
+                    "value" : "Fotky"
+                  }
+                },
+                "da" : {
+                  "stringUnit" : {
+                    "state" : "translated",
+                    "value" : "Fotos"
+                  }
+                },
+                "de" : {
+                  "stringUnit" : {
+                    "state" : "translated",
+                    "value" : "Fotos"
+                  }
+                },
+                "el" : {
+                  "stringUnit" : {
+                    "state" : "translated",
+                    "value" : "Φωτογραφίες"
+                  }
+                },
+                "en" : {
+                  "stringUnit" : {
+                    "state" : "new",
+                    "value" : "Photos"
+                  }
+                },
+                "es" : {
+                  "stringUnit" : {
+                    "state" : "translated",
+                    "value" : "Fotos"
+                  }
+                },
+                "es-419" : {
+                  "stringUnit" : {
+                    "state" : "translated",
+                    "value" : "Fotos"
+                  }
+                },
+                "es-US" : {
+                  "stringUnit" : {
+                    "state" : "translated",
+                    "value" : "Fotos"
+                  }
+                },
+                "fi" : {
+                  "stringUnit" : {
+                    "state" : "translated",
+                    "value" : "Kuvat"
+                  }
+                },
+                "fr" : {
+                  "stringUnit" : {
+                    "state" : "translated",
+                    "value" : "Photos"
+                  }
+                },
+                "He" : {
+                  "stringUnit" : {
+                    "state" : "translated",
+                    "value" : "תמונות"
+                  }
+                },
+                "hi" : {
+                  "stringUnit" : {
+                    "state" : "translated",
+                    "value" : "फ़ोटो"
+                  }
+                },
+                "hu" : {
+                  "stringUnit" : {
+                    "state" : "translated",
+                    "value" : "Fotók"
+                  }
+                },
+                "id" : {
+                  "stringUnit" : {
+                    "state" : "translated",
+                    "value" : "Foto"
+                  }
+                },
+                "it" : {
+                  "stringUnit" : {
+                    "state" : "translated",
+                    "value" : "Foto"
+                  }
+                },
+                "ja" : {
+                  "stringUnit" : {
+                    "state" : "translated",
+                    "value" : "写真"
+                  }
+                },
+                "ko" : {
+                  "stringUnit" : {
+                    "state" : "translated",
+                    "value" : "사진"
+                  }
+                },
+                "ms" : {
+                  "stringUnit" : {
+                    "state" : "translated",
+                    "value" : "Foto"
+                  }
+                },
+                "nb" : {
+                  "stringUnit" : {
+                    "state" : "translated",
+                    "value" : "Bilder"
+                  }
+                },
+                "nl" : {
+                  "stringUnit" : {
+                    "state" : "translated",
+                    "value" : "Foto’s"
+                  }
+                },
+                "pa" : {
+                  "stringUnit" : {
+                    "state" : "translated",
+                    "value" : "ਫੋਟੋਆਂ"
+                  }
+                },
+                "pl" : {
+                  "stringUnit" : {
+                    "state" : "translated",
+                    "value" : "Zdjęcia"
+                  }
+                },
+                "pt-BR" : {
+                  "stringUnit" : {
+                    "state" : "translated",
+                    "value" : "Fotos"
+                  }
+                },
+                "pt-PT" : {
+                  "stringUnit" : {
+                    "state" : "translated",
+                    "value" : "Fotos"
+                  }
+                },
+                "ro" : {
+                  "stringUnit" : {
+                    "state" : "translated",
+                    "value" : "Fotografii"
+                  }
+                },
+                "ru" : {
+                  "stringUnit" : {
+                    "state" : "translated",
+                    "value" : "Фото"
+                  }
+                },
+                "sv" : {
+                  "stringUnit" : {
+                    "state" : "translated",
+                    "value" : "Bilder"
+                  }
+                },
+                "th" : {
+                  "stringUnit" : {
+                    "state" : "translated",
+                    "value" : "รูปภาพ"
+                  }
+                },
+                "tr" : {
+                  "stringUnit" : {
+                    "state" : "translated",
+                    "value" : "Fotoğraflar"
+                  }
+                },
+                "uk" : {
+                  "stringUnit" : {
+                    "state" : "translated",
+                    "value" : "Фото"
+                  }
+                },
+                "ur" : {
+                  "stringUnit" : {
+                    "state" : "translated",
+                    "value" : "تصاویر"
+                  }
+                },
+                "vi" : {
+                  "stringUnit" : {
+                    "state" : "translated",
+                    "value" : "Ảnh"
+                  }
+                },
+                "zh-Hans" : {
+                  "stringUnit" : {
+                    "state" : "translated",
+                    "value" : "照片"
+                  }
+                },
+                "zh-Hant" : {
+                  "stringUnit" : {
+                    "state" : "translated",
+                    "value" : "照片"
+                  }
+                },
+                "zh-HK" : {
+                  "stringUnit" : {
+                    "state" : "translated",
+                    "value" : "照片"
+                  }
+                }
       }
     },
     "NSHumanReadableCopyright" : {
