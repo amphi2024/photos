@@ -54,7 +54,7 @@ class WideMainPage extends ConsumerWidget {
           ),
          Positioned(
               left: 200,
-              top: desktopTitleBarHeight,
+              top: desktopTitleBarHeight + MediaQuery.of(context).padding.top,
               bottom: 0,
               right: currentPhotoId.isEmpty ? 0 : showingPhotoWidth,
               child: () {
