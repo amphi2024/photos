@@ -83,7 +83,7 @@
             "value" : "Photos+"
           }
         },
-        "He" : {
+        "he" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "תמונות+"
@@ -242,7 +242,19 @@
         "en" : {
           "stringUnit" : {
             "state" : "new",
-            "value" : "photos"
+            "value" : "Amphi Photos"
+          }
+        }
+      }
+    },
+    "NSPhotoLibraryUsageDescription" : {
+      "comment" : "Privacy - Photo Library Usage Description",
+      "extractionState" : "extracted_with_value",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "This app requires access to your photo library to allow you to upload and share photos."
           }
         }
       }
