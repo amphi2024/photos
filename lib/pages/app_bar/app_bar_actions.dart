@@ -29,6 +29,9 @@ List<Widget> appbarActions({required BuildContext context, required int fragment
     else if (fragmentIndex == FragmentIndex.albums) {
       return albumSelectionActions(context: context, ref: ref);
     }
+    else if(fragmentIndex == FragmentIndex.album) {
+      return photoSelectionActions(context: context, ref: ref, albumId: ref.read(currentAlbumIdProvider));
+    }
     else {
       return trashSelectionActions(context: context, ref: ref);
     }
@@ -92,11 +95,14 @@ List<Widget> appbarActions({required BuildContext context, required int fragment
         appStorage.refreshDataWithServer(ref);
       }),
     ),
-    PopupMenuButton(
-        icon: const Icon(Icons.more_horiz),
-        itemBuilder: (context) {
-         return mainPageAppBarPopupMenuItems(ref: ref, fragmentIndex: fragmentIndex, context: context);
-        }),
+    Visibility(
+      visible: fragmentIndex != FragmentIndex.settings,
+      child: PopupMenuButton(
+          icon: const Icon(Icons.more_horiz),
+          itemBuilder: (context) {
+           return mainPageAppBarPopupMenuItems(ref: ref, fragmentIndex: fragmentIndex, context: context);
+          }),
+    ),
   ];
 }
 
