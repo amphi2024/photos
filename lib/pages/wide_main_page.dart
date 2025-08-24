@@ -5,6 +5,7 @@ import 'package:amphi/models/app_localizations.dart';
 import 'package:bitsdojo_window/bitsdojo_window.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:photos/channels/app_method_channel.dart';
 import 'package:photos/components/custom_window_button.dart';
 import 'package:photos/components/desktop_nav_menu.dart';
 import 'package:photos/models/fragment_index.dart';
@@ -23,10 +24,11 @@ class WideMainPage extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    appMethodChannel.setNavigationBarColor(Theme.of(context).scaffoldBackgroundColor);
     final selectingItems = ref.watch(selectedItemsProvider) != null;
     final actions = appbarActions(context: context, fragmentIndex: ref.watch(fragmentIndexProvider), ref: ref, selectingItems: selectingItems);
     final currentPhotoId = ref.watch(currentPhotoIdProvider);
-    double sex = MediaQuery.of(context).size.width / 1.75;
+    double showingPhotoWidth = MediaQuery.of(context).size.width / 1.75;
 
     final colors = CustomWindowButtonColors(
       iconMouseOver: Theme.of(context).textTheme.bodyMedium?.color,
@@ -54,7 +56,7 @@ class WideMainPage extends ConsumerWidget {
               left: 200,
               top: desktopTitleBarHeight,
               bottom: 0,
-              right: currentPhotoId.isEmpty ? 0 : sex,
+              right: currentPhotoId.isEmpty ? 0 : showingPhotoWidth,
               child: () {
                 final fragment = ref.watch(fragmentIndexProvider);
                 if (fragment == FragmentIndex.photos) {
@@ -68,10 +70,11 @@ class WideMainPage extends ConsumerWidget {
               }()
          ),
           Positioned(
-              left: 200,
-              top: 0,
+            left: 200,
+              top: MediaQuery.of(context).padding.top,
               right: 0,
               child: Row(
+                mainAxisAlignment: MainAxisAlignment.end,
                 children: [
                   if (App.isDesktop()) Expanded(child: SizedBox(height: desktopTitleBarHeight, child: MoveWindow())),
                   ...actions,
@@ -104,12 +107,12 @@ class WideMainPage extends ConsumerWidget {
                 ]
               )),
           Positioned(
-            top: desktopTitleBarHeight,
+            top: desktopTitleBarHeight + MediaQuery.of(context).padding.top,
             bottom: 0,
             right: 0,
             child: Visibility(
               visible: currentPhotoId.isNotEmpty,
-                child: DesktopPhotoView(width: sex)),
+                child: DesktopPhotoView(width: showingPhotoWidth)),
           ),
         ],
       ),

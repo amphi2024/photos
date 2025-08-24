@@ -27,144 +27,149 @@ class DesktopNavMenu extends ConsumerWidget {
     return Container(
         width: 200,
         color: Theme.of(context).navigationDrawerTheme.backgroundColor,
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.start,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              children: [
-                Expanded(child: Builder(builder: (context) {
-                  if (App.isDesktop()) {
-                    return SizedBox(height: 50, child: MoveWindow());
-                  } else {
-                    return const SizedBox(height: 50);
-                  }
-                })),
-                AccountButton(onLoggedIn: () {
-                  appStorage.refreshDataWithServer(ref);
-                }),
-                IconButton(
-                    onPressed: () {
-                      appStorage.refreshDataWithServer(ref);
-                    },
-                    icon: const Icon(Icons.refresh))
-              ],
-            ),
-            Expanded(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.start,
-                crossAxisAlignment: CrossAxisAlignment.start,
+        child: Padding(
+          padding: EdgeInsets.only(
+            top: MediaQuery.of(context).padding.top
+          ),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.start,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
                 children: [
-                  _MenuText(text: AppLocalizations.of(context).get("@photos")),
-                  _MenuItem(
-                      icon: Icons.photo_library_outlined,
-                      title: AppLocalizations.of(context).get("@library"),
+                  Expanded(child: Builder(builder: (context) {
+                    if (App.isDesktop()) {
+                      return SizedBox(height: 50, child: MoveWindow());
+                    } else {
+                      return const SizedBox(height: 50);
+                    }
+                  })),
+                  AccountButton(onLoggedIn: () {
+                    appStorage.refreshDataWithServer(ref);
+                  }),
+                  IconButton(
                       onPressed: () {
-                        ref.read(fragmentIndexProvider.notifier).state = 0;
-                      }),
-                  _MenuItem(
-                      icon: Icons.delete,
-                      title: AppLocalizations.of(context).get("@trash"),
-                      onPressed: () {
-                        ref.read(fragmentIndexProvider.notifier).state = 2;
-                      }),
-                  Row(
-                    children: [
-                      Expanded(child: _MenuText(text: AppLocalizations.of(context).get("@albums"))),
-                      PopupMenuButton(
-                        padding: EdgeInsets.zero,
-                        itemBuilder: (context) {
-                          return albumsPopupMenuItems(ref: ref, context: context);
-                        },
-                        icon: const Icon(Icons.more_horiz),
-                        iconSize: 14,
-                      )
-                    ],
-                  ),
-                  Expanded(
-                      child: ListView.builder(
-                          itemCount: ref.read(albumsProvider).idList.length,
-                          itemBuilder: (context, index) {
-                            final album = ref.watch(albumsProvider).getAlbum(index);
-                            return _MenuItem(
-                                icon: Icons.photo_album,
-                                title: album.title,
-                                onPressed: () {
-                                  ref.read(currentAlbumIdProvider.notifier).state = album.id;
-                                  if (ref.watch(fragmentIndexProvider) != FragmentIndex.album) {
-                                    ref.read(fragmentIndexProvider.notifier).state = FragmentIndex.album;
-                                  }
-                                });
-                          }))
+                        appStorage.refreshDataWithServer(ref);
+                      },
+                      icon: const Icon(Icons.refresh))
                 ],
               ),
-            ),
-            Row(
-              children: [
-                IconButton(
-                    onPressed: () {
-                      showDialog(
-                          context: context,
-                          builder: (context) => Dialog(
-                                child: SizedBox(
-                                  width: 450,
-                                  height: 500,
-                                  child: Column(
-                                    children: [
-                                      Align(
-                                        alignment: Alignment.topRight,
-                                        child: IconButton(
-                                            onPressed: () {
-                                              appSettings.save();
-                                              Navigator.pop(context);
-                                            },
-                                            icon: const Icon(Icons.cancel_outlined)),
-                                      ),
-                                      const Expanded(child: SettingsView()),
-                                    ],
+              Expanded(
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.start,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    _MenuText(text: AppLocalizations.of(context).get("@photos")),
+                    _MenuItem(
+                        icon: Icons.photo_library_outlined,
+                        title: AppLocalizations.of(context).get("@library"),
+                        onPressed: () {
+                          ref.read(fragmentIndexProvider.notifier).state = 0;
+                        }),
+                    _MenuItem(
+                        icon: Icons.delete,
+                        title: AppLocalizations.of(context).get("@trash"),
+                        onPressed: () {
+                          ref.read(fragmentIndexProvider.notifier).state = 2;
+                        }),
+                    Row(
+                      children: [
+                        Expanded(child: _MenuText(text: AppLocalizations.of(context).get("@albums"))),
+                        PopupMenuButton(
+                          padding: EdgeInsets.zero,
+                          itemBuilder: (context) {
+                            return albumsPopupMenuItems(ref: ref, context: context);
+                          },
+                          icon: const Icon(Icons.more_horiz),
+                          iconSize: 14,
+                        )
+                      ],
+                    ),
+                    Expanded(
+                        child: ListView.builder(
+                            itemCount: ref.read(albumsProvider).idList.length,
+                            itemBuilder: (context, index) {
+                              final album = ref.watch(albumsProvider).getAlbum(index);
+                              return _MenuItem(
+                                  icon: Icons.photo_album,
+                                  title: album.title,
+                                  onPressed: () {
+                                    ref.read(currentAlbumIdProvider.notifier).state = album.id;
+                                    if (ref.watch(fragmentIndexProvider) != FragmentIndex.album) {
+                                      ref.read(fragmentIndexProvider.notifier).state = FragmentIndex.album;
+                                    }
+                                  });
+                            }))
+                  ],
+                ),
+              ),
+              Row(
+                children: [
+                  IconButton(
+                      onPressed: () {
+                        showDialog(
+                            context: context,
+                            builder: (context) => Dialog(
+                                  child: SizedBox(
+                                    width: 450,
+                                    height: 500,
+                                    child: Column(
+                                      children: [
+                                        Align(
+                                          alignment: Alignment.topRight,
+                                          child: IconButton(
+                                              onPressed: () {
+                                                appSettings.save();
+                                                Navigator.pop(context);
+                                              },
+                                              icon: const Icon(Icons.cancel_outlined)),
+                                        ),
+                                        const Expanded(child: SettingsView()),
+                                      ],
+                                    ),
                                   ),
-                                ),
-                              )).then((value) {
-                        appSettings.save();
-                      });
-                    },
-                    icon: const Icon(
-                      Icons.settings,
-                      size: 18,
-                    )),
-                PopupMenuButton(
-                    itemBuilder: (context) {
-                      return [
-                        PopupMenuItem(
-                          height: 30,
-                          onTap: () {
-                            createPhotos(ref);
-                          },
-                          child: Text(AppLocalizations.of(context).get("@new_photo")),
-                        ),
-                        PopupMenuItem(
-                          height: 30,
-                          onTap: () {
-                            final filename = FilenameUtils.generatedFileName(".album", appStorage.albumsPath);
-                            final album = Album.fromFilename(filename);
-                            showDialog(
-                                context: context,
-                                builder: (context) => EditAlbumDialog(
-                                      album: album,
-                                    ));
-                          },
-                          child: Text(AppLocalizations.of(context).get("@new_album")),
-                        ),
-                      ];
-                    },
-                    icon: const Icon(
-                      Icons.add_circle_outline,
-                      size: 18,
-                    )),
-                const TransfersButton(iconSize: 18)
-              ],
-            )
-          ],
+                                )).then((value) {
+                          appSettings.save();
+                        });
+                      },
+                      icon: const Icon(
+                        Icons.settings,
+                        size: 18,
+                      )),
+                  PopupMenuButton(
+                      itemBuilder: (context) {
+                        return [
+                          PopupMenuItem(
+                            height: 30,
+                            onTap: () {
+                              createPhotos(ref);
+                            },
+                            child: Text(AppLocalizations.of(context).get("@new_photo")),
+                          ),
+                          PopupMenuItem(
+                            height: 30,
+                            onTap: () {
+                              final filename = FilenameUtils.generatedFileName(".album", appStorage.albumsPath);
+                              final album = Album.fromFilename(filename);
+                              showDialog(
+                                  context: context,
+                                  builder: (context) => EditAlbumDialog(
+                                        album: album,
+                                      ));
+                            },
+                            child: Text(AppLocalizations.of(context).get("@new_album")),
+                          ),
+                        ];
+                      },
+                      icon: const Icon(
+                        Icons.add_circle_outline,
+                        size: 18,
+                      )),
+                  const TransfersButton(iconSize: 18)
+                ],
+              )
+            ],
+          ),
         ));
   }
 }
@@ -197,8 +202,10 @@ class _MenuItem extends StatelessWidget {
       child: GestureDetector(
         onTap: () {
           onPressed();
-          appCacheData.windowHeight = appWindow.size.height;
-          appCacheData.windowWidth = appWindow.size.width;
+          if(App.isDesktop()) {
+            appCacheData.windowHeight = appWindow.size.height;
+            appCacheData.windowWidth = appWindow.size.width;
+          }
           appCacheData.save();
         },
         child: Row(
