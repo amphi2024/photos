@@ -161,6 +161,7 @@ PopupMenuItem _popupMenuItem(
       } else {
         appCacheData.setSortOption(sortOption: sortOption, id: id);
       }
+      appCacheData.save();
       sort();
     },
   );
