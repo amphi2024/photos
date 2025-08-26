@@ -7,7 +7,7 @@ env:
   FLUTTER_VERSION: "3.29.2"
 
 jobs:
-  build_tar:
+  build_snap:
     runs-on: ubuntu-latest
 
     steps:
@@ -55,9 +55,10 @@ jobs:
         run: |
           cd snap
           snapcraft pack --destructive-mode
+          cd ..
 
       - name: Upload SNAP as Artifact
         uses: actions/upload-artifact@v4
         with:
           name: result-snap
-          path: *
+          path: snap/*
