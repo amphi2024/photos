@@ -154,7 +154,6 @@ parts:
       - libpciaccess0
       - libdisplay-info1
       - zenity
-      - imagemagick
 
     prime:
       - usr/lib/*/libass*
