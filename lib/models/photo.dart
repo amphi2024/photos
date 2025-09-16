@@ -3,6 +3,7 @@ import 'dart:io';
 import 'dart:math';
 
 import 'package:amphi/utils/path_utils.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 import 'package:photos/channels/app_method_channel.dart';
@@ -163,13 +164,23 @@ class Photo {
   }
 
   Future<bool> verifySha256() async {
-    var photoFile = File(photoPath);
-    if(!await photoFile.exists()) {
-      return false;
-    }
-    final digest = crypto.sha256.convert(await photoFile.readAsBytes());
-    final currentHash = digest.toString();
-    return currentHash == sha256;
+    return verifySha256Isolate(photoPath, sha256);
+  }
+
+  Future<bool> verifySha256Isolate(String path, String expectedSha256) async {
+    return await compute(_computeSha256, {'path': path, 'sha256': expectedSha256});
+  }
+
+  Future<bool> _computeSha256(Map<String, String> args) async {
+    final path = args['path']!;
+    final expectedSha256 = args['sha256']!;
+
+    final file = File(path);
+    if (!file.existsSync()) return false;
+
+    final digest = await crypto.sha256.bind(file.openRead()).first;
+
+    return digest.toString() == expectedSha256;
   }
 
   Future<void> save({bool upload = true}) async {
@@ -203,10 +214,10 @@ class Photo {
   }
 
   Future<void> deleteThumbnail() async {
-    final file = File(thumbnailPath);
-    if(await file.exists()) {
-      await file.delete();
-    }
+    // final file = File(thumbnailPath);
+    // if(await file.exists()) {
+    //   await file.delete();
+    // }
   }
 
 }

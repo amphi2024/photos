@@ -79,17 +79,17 @@ class AppStorage extends AppStorageCore {
     appWebChannel.acknowledgeEvent(updateEvent);
   }
 
-  void refreshDataWithServer(WidgetRef ref) async {
+  Future<void> refreshDataWithServer(WidgetRef ref) async {
     await appWebChannel.getItems(url: "${appWebChannel.serverAddress}/photos", onSuccess: (idList) async {
 
       for(var id in ref.read(photosProvider).idList) {
         final photo = ref.read(photosProvider).photos.get(id);
-        appWebChannel.getSha256FromPhoto(id: id, onSuccess: (sha256) {
+        await appWebChannel.getSha256FromPhoto(id: id, onSuccess: (sha256) async {
           if(photo.sha256 != sha256) {
-            appWebChannel.uploadPhoto(photo: photo, ref: ref);
+            await appWebChannel.uploadPhoto(photo: photo, ref: ref);
           }
-        }, onFailed: (code) {
-          appWebChannel.uploadPhoto(photo: photo, ref: ref);
+        }, onFailed: (code) async {
+          await appWebChannel.uploadPhoto(photo: photo, ref: ref);
         });
       }
 
@@ -101,8 +101,8 @@ class AppStorage extends AppStorageCore {
             photo.data = data;
             photo.getPhotoPath();
             await photo.save(upload: false);
+            await appWebChannel.downloadPhotoFile(photo: photo, ref: ref);
             ref.read(photosProvider.notifier).insertPhoto(photo);
-            appWebChannel.downloadPhotoFile(photo: photo, ref: ref);
           });
         }
       }
