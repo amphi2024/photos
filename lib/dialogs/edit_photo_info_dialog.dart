@@ -58,6 +58,7 @@ class _EditPhotoInfoDialogState extends ConsumerState<EditPhotoInfoDialog> {
                       widget.photo.title = titleController.text;
                       widget.photo.date = date;
                       widget.photo.note = commentController.text;
+                      widget.photo.save();
                       ref.read(photosProvider.notifier).insertPhoto(widget.photo);
                     }, icon: const Icon(Icons.check_circle_outline, size: 20,)),
                   ],)),
