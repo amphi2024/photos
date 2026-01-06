@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:amphi/models/app_storage_core.dart';
 import 'package:amphi/models/update_event.dart';
 import 'package:amphi/utils/path_utils.dart';
@@ -15,26 +17,30 @@ class AppStorage extends AppStorageCore {
   AppStorage._internal();
 
   late String themesPath;
-  late String photosPath;
+  late String libraryPath;
   late String albumsPath;
 
   static AppStorage getInstance() => _instance;
+
+  String get databasePath => PathUtils.join(selectedUser.storagePath, "photos.db");
 
   @override
   void initPaths() {
     super.initPaths();
     themesPath = PathUtils.join(selectedUser.storagePath, "themes");
-    photosPath = PathUtils.join(selectedUser.storagePath, "photos");
+
+    // TODO: change it to library when the app is ready for update
+    libraryPath = PathUtils.join(selectedUser.storagePath, "photos");
     albumsPath = PathUtils.join(selectedUser.storagePath, "albums");
 
     createDirectoryIfNotExists(themesPath);
-    createDirectoryIfNotExists(photosPath);
+    createDirectoryIfNotExists(libraryPath);
     createDirectoryIfNotExists(albumsPath);
   }
 
   Future<void> syncDataFromEvents(WidgetRef ref) async {
     if (appWebChannel.token.isNotEmpty) {
-      appWebChannel.getEvents(onResponse: (updateEvents) async {
+      appWebChannel.getEvents(onSuccess: (updateEvents) async {
         for (UpdateEvent updateEvent in updateEvents) {
           syncData(updateEvent, ref);
         }
@@ -84,50 +90,64 @@ class AppStorage extends AppStorageCore {
 
       for(var id in ref.read(photosProvider).idList) {
         final photo = ref.read(photosProvider).photos.get(id);
-        await appWebChannel.getSha256FromPhoto(id: id, onSuccess: (sha256) async {
-          if(photo.sha256 != sha256) {
-            await appWebChannel.uploadPhoto(photo: photo, ref: ref);
-          }
-        }, onFailed: (code) async {
-          await appWebChannel.uploadPhoto(photo: photo, ref: ref);
-        });
+        await appWebChannel.uploadPhotoInfo(photo: photo);
+        await appWebChannel.uploadPhoto(photo: photo, ref: ref);
+        // final infoFile = File(PathUtils.join(photo.path, "info.json"));
+        // if(!infoFile.existsSync()) {
+        //   await appWebChannel.downloadPhotoInfo(id: id, onSuccess: (data) async {
+        //     photo.data = data;
+        //     photo.getPhotoPath();
+        //     await appWebChannel.downloadPhotoThumbnail(photo: photo);
+        //     await photo.save(upload: false);
+        //     //await appWebChannel.downloadPhotoFile(photo: photo, ref: ref);
+        //     ref.read(photosProvider.notifier).insertPhoto(photo);
+        //   });
+        // }
+        // await appWebChannel.getSha256FromPhoto(id: id, onSuccess: (sha256) async {
+        //   if(photo.sha256 != sha256) {
+        //     await appWebChannel.uploadPhoto(photo: photo, ref: ref);
+        //   }
+        // }, onFailed: (code) async {
+        //   await appWebChannel.uploadPhoto(photo: photo, ref: ref);
+        // });
       }
 
-      for(var id in idList) {
-        final photo = ref.read(photosProvider).photos.get(id);
-        final valid = await photo.verifySha256();
-        if(!valid) {
-          await appWebChannel.downloadPhotoInfo(id: id, onSuccess: (data) async {
-            photo.data = data;
-            photo.getPhotoPath();
-            await photo.save(upload: false);
-            await appWebChannel.downloadPhotoFile(photo: photo, ref: ref);
-            ref.read(photosProvider.notifier).insertPhoto(photo);
-          });
-        }
-      }
+      // for(var id in idList) {
+      //   final photo = ref.read(photosProvider).photos.get(id);
+      //   final valid = await photo.verifySha256();
+      //   if(!valid) {
+      //     await appWebChannel.downloadPhotoInfo(id: id, onSuccess: (data) async {
+      //       photo.data = data;
+      //       photo.getPhotoPath();
+      //       await appWebChannel.downloadPhotoThumbnail(photo: photo);
+      //       await photo.save(upload: false);
+      //       //await appWebChannel.downloadPhotoFile(photo: photo, ref: ref);
+      //       ref.read(photosProvider.notifier).insertPhoto(photo);
+      //     });
+      //   }
+      // }
 
     });
 
-    await appWebChannel.getItems(url: "${appWebChannel.serverAddress}/photos/albums", onSuccess: (idList) async {
+    await appWebChannel.getItems(url: "${appWebChannel.serverAddress}/photos/albums", onSuccess: (ids) async {
 
-      for(var id in ref.read(albumsProvider).idList) {
-        if(!idList.contains(id)) {
-          final album = ref.read(albumsProvider).albums[id];
-          if(album != null) {
-            await appWebChannel.uploadAlbum(album: album);
-          }
-        }
-      }
-
-      for(var id in idList) {
-        if(!ref.read(albumsProvider).idList.contains(id)) {
-          await appWebChannel.downloadAlbum(id: id, onSuccess: (album) {
-            ref.read(albumsProvider.notifier).insertAlbum(album);
-          });
-        }
-
-      }
+      // for(var id in ref.read(albumsProvider).idList) {
+      //   if(!ids.contains(id)) {
+      //     final album = ref.read(albumsProvider).albums[id];
+      //     if(album != null) {
+      //       await appWebChannel.uploadAlbum(album: album);
+      //     }
+      //   }
+      // }
+      //
+      // for(var id in ids) {
+      //   if(!ref.read(albumsProvider).idList.contains(id)) {
+      //     await appWebChannel.downloadAlbum(id: id, onSuccess: (album) {
+      //       ref.read(albumsProvider.notifier).insertAlbum(album);
+      //     });
+      //   }
+      //
+      // }
 
     });
 
