@@ -51,47 +51,14 @@ class AppWebChannel extends AppWebChannelCore {
       connected = false;
     }, cancelOnError: true);
   }
-
-  void getEvents({required void Function(List<UpdateEvent>) onResponse}) async {
-    List<UpdateEvent> list = [];
-    final response = await get(
-      Uri.parse("$serverAddress/photos/events"),
-      headers: <String, String>{'Content-Type': 'application/json; charset=UTF-8', "Authorization": appWebChannel.token},
-    );
-    if (response.statusCode == HttpStatus.ok) {
-      List<dynamic> decoded = jsonDecode(utf8.decode(response.bodyBytes));
-      for (Map<String, dynamic> map in decoded) {
-        UpdateEvent updateEvent = UpdateEvent.fromJson(map);
-        list.add(updateEvent);
-      }
-      onResponse(list);
-    } else if (response.statusCode == HttpStatus.unauthorized) {
-      appStorage.selectedUser.token = "";
-    }
-  }
   
-  void acknowledgeEvent(UpdateEvent updateEvent) async {
-    Map<String, dynamic> data = {
-      'value': updateEvent.value,
-      'action': updateEvent.action,
-    };
-
-    String postData = json.encode(data);
-
-    await delete(
-      Uri.parse("${appSettings.serverAddress}/photos/events"),
-      headers: <String, String>{'Content-Type': 'application/json; charset=UTF-8', "Authorization": appStorage.selectedUser.token},
-      body: postData,
-    );
-  }
-
   Future<void> uploadPhotoInfo({required Photo photo}) async {
     final updateEvent = UpdateEvent(action: UpdateEvent.uploadPhoto, value: photo.id);
-    await uploadJson(url: "$serverAddress/photos/${photo.id}/info", jsonBody: jsonEncode(photo.data), updateEvent: updateEvent);
+    await postJson(url: "$serverAddress/photos/${photo.id}/info", jsonBody: jsonEncode(photo.data), updateEvent: updateEvent);
   }
 
   Future<void> uploadPhoto({required Photo photo, void Function()? onSuccess, void Function(int?)? onFailed, required WidgetRef ref}) async {
-    await uploadFile(url: "$serverAddress/photos/${photo.id}", filePath: photo.photoPath, headers: {"X-File-Extension": photo.mimeType.split("/").last}, onSuccess: () {
+    await postFile(url: "$serverAddress/photos/${photo.id}", filePath: photo.photoPath, headers: {"X-File-Extension": photo.mimeType.split("/").last}, onSuccess: () {
       ref.read(transfersProvider.notifier).removeItem(photo.id);
       onSuccess?.call();
     }, onFailed: (code) {
@@ -148,31 +115,10 @@ class AppWebChannel extends AppWebChannelCore {
     final updateEvent = UpdateEvent(action: UpdateEvent.deletePhoto, value: photo.id);
     await simpleDelete(url: "$serverAddress/photos/${photo.id}", updateEvent: updateEvent);
   }
-
-  Future<void> getItems({required String url, required void Function(List<String>) onSuccess, void Function(int?)? onFailed}) async {
-    try {
-      final response = await get(
-        Uri.parse(url),
-        headers: <String, String>{'Content-Type': 'application/json; charset=UTF-8', "Authorization": appWebChannel.token},
-      );
-      if (response.statusCode == 200) {
-        List<dynamic> list = jsonDecode(response.body);
-        onSuccess(list.map((item) => item as String).toList());
-      } else {
-        if (onFailed != null) {
-          onFailed(response.statusCode);
-        }
-      }
-    } catch (e) {
-      if (onFailed != null) {
-        onFailed(null);
-      }
-    }
-  }
   
   Future<void> uploadAlbum({required Album album}) async {
     final updateEvent = UpdateEvent(action: UpdateEvent.uploadAlbum, value: album.id);
-    await uploadJson(url: "$serverAddress/photos/albums/${album.id}", jsonBody: jsonEncode(album.data), updateEvent: updateEvent);
+    await postJson(url: "$serverAddress/photos/albums/${album.id}", jsonBody: jsonEncode(album.data), updateEvent: updateEvent);
   }
 
   Future<void> deleteAlbum({required Album album}) async {

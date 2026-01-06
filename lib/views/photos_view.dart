@@ -76,10 +76,10 @@ class _PhotosViewState extends ConsumerState<PhotosView> with FragmentViewMixin 
                   return;
                 }
                 if(ref.watch(currentPhotoIdProvider) == id) {
-                  ref.read(currentPhotoIdProvider.notifier).state = "";
+                  ref.read(currentPhotoIdProvider.notifier).set("");
                 }
                 else {
-                  ref.read(currentPhotoIdProvider.notifier).state = id;
+                  ref.read(currentPhotoIdProvider.notifier).set(id);
                 }
 
                 if(!App.isWideScreen(context) && !App.isDesktop()) {

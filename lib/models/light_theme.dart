@@ -6,17 +6,17 @@ class LightTheme extends AppThemeData {
 
   LightTheme(
       {
-        super.backgroundColor = AppTheme.lightGray,
-        super.textColor = AppTheme.midnight,
-        super.accentColor = AppTheme.cherryBlossom,
-        super.inactiveColor = AppTheme.inactiveGray,
-        super.noteBackgroundColor = AppTheme.white,
-        super.noteTextColor = AppTheme.midnight,
-        super.floatingButtonBackground = AppTheme.white,
-        super.floatingButtonIconColor = AppTheme.cherryBlossom,
-        super.checkBoxColor = AppTheme.cherryBlossom,
-        super.checkBoxCheckColor = AppTheme.white,
-        super.errorColor = AppTheme.red,
+        super.backgroundColor = ThemeModel.lightGray,
+        super.textColor = ThemeModel.midnight,
+        super.accentColor = ThemeModel.cherryBlossom,
+        super.inactiveColor = ThemeModel.inactiveGray,
+        super.noteBackgroundColor = ThemeModel.white,
+        super.noteTextColor = ThemeModel.midnight,
+        super.floatingButtonBackground = ThemeModel.white,
+        super.floatingButtonIconColor = ThemeModel.cherryBlossom,
+        super.checkBoxColor = ThemeModel.cherryBlossom,
+        super.checkBoxCheckColor = ThemeModel.white,
+        super.errorColor = ThemeModel.red,
         super.menuBackground =  const Color.fromRGBO(235, 235, 235, 1)
       });
   ThemeData toThemeData(BuildContext context) {

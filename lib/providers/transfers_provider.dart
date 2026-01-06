@@ -2,8 +2,12 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:photos/models/transfer.dart';
 
-class TransfersNotifier extends StateNotifier<List<Transfer>> {
-  TransfersNotifier() : super([]);
+class TransfersNotifier extends Notifier<List<Transfer>> {
+
+  @override
+  List<Transfer> build() {
+    return [];
+  }
 
   void insertItem(Transfer transfer) {
     final index = state.indexWhere((e) => e.id == transfer.id);
@@ -26,6 +30,4 @@ class TransfersNotifier extends StateNotifier<List<Transfer>> {
 
 }
 
-final transfersProvider = StateNotifierProvider<TransfersNotifier, List<Transfer>>((ref) {
-  return TransfersNotifier();
-});
+final transfersProvider = NotifierProvider<TransfersNotifier, List<Transfer>>(TransfersNotifier.new);

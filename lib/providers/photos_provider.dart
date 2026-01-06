@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:amphi/utils/path_utils.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:photos/database/database_helper.dart';
 import 'package:photos/models/app_cache.dart';
 import 'package:photos/models/app_settings.dart';
 import 'package:photos/models/app_storage.dart';
@@ -26,8 +27,47 @@ class PhotosState {
 
 }
 
-class PhotosNotifier extends StateNotifier<PhotosState> {
-  PhotosNotifier() : super(PhotosState({}, [], []));
+class PhotosNotifier extends Notifier<PhotosState> {
+  @override
+  PhotosState build() {
+    return PhotosState({}, [], []);
+  }
+
+  static Future<PhotosState> initialized() async {
+    final Map<String, Photo> photos = {};
+    final List<String> idList = [];
+    final List<String> trash = [];
+
+    final database = await databaseHelper.database;
+    final List<Map<String, dynamic>> list = await database.rawQuery("SELECT * FROM photos", []);
+
+    DateTime currentDate = DateTime.now();
+    DateTime dateBeforeDays = currentDate.subtract(const Duration(days: 30));
+
+    for(var data in list) {
+      final photo = Photo.fromMap(data);
+      photos[photo.id] = photo;
+      if (photo.deleted == null) {
+        idList.add(photo.id);
+      }
+      else {
+        if (photo.deleted!.isBefore(dateBeforeDays)) {
+          photo.delete(upload: false);
+        }
+        else {
+          trash.add(photo.id);
+        }
+      }
+    }
+
+    idList.sortPhotos(appCacheData.sortOption("!PHOTOS"), photos);
+
+    return PhotosState(photos, idList, trash);
+  }
+
+  Future<void> rebuild() async {
+    state = await initialized();
+  }
 
   void insertPhoto(Photo photo) {
     final photos = {...state.photos, photo.id: photo};
@@ -82,119 +122,121 @@ class PhotosNotifier extends StateNotifier<PhotosState> {
     state = state1;
   }
 
-  void init() {
-    final Map<String, Photo> photos = {};
-    final List<String> photoIdList = [];
-    final List<String> trash = [];
-    var directory = Directory(appStorage.photosPath);
-    if(!directory.existsSync()) {
-      return;
-    }
-    DateTime currentDate = DateTime.now();
-    DateTime dateBeforeDays = currentDate.subtract(const Duration(days: 30));
-    for(var subDirectory in directory.listSync()) {
-      if(subDirectory is Directory) {
-        for(var subDirectory2 in subDirectory.listSync()) {
-          if(subDirectory2 is Directory) {
-            for(var directory in subDirectory2.listSync()) {
-              if(directory is Directory) {
-                var id = PathUtils.basename(directory.path);
-                final photo = Photo.fromId(id);
-                photos[id] = photo;
-                if(!File(photo.thumbnailPath).existsSync()) {
-                  if(appSettings.useOwnServer) {
-                    appWebChannel.downloadPhotoThumbnail(photo: photo, onFailed: (code) {
-                      photo.generateThumbnail();
-                    });
-                  }
-                  else {
-                    photo.generateThumbnail();
-                  }
-                }
-                if(photo.deleted == null) {
-                  photoIdList.add(photo.id);
-                }
-                else {
-                  if(photo.deleted!.isBefore(dateBeforeDays)) {
-                    photo.delete(upload: false);
-                  }
-                  else {
-                    trash.add(photo.id);
-                  }
-                }
-              }
-            }
-          }
-        }
-      }
-    }
-
-    state = PhotosState(photos, photoIdList, trash);
-  }
-
 }
 
-final photosProvider = StateNotifierProvider<PhotosNotifier, PhotosState>((ref) {
-  return PhotosNotifier();
-});
+final photosProvider = NotifierProvider<PhotosNotifier, PhotosState>(PhotosNotifier.new);
 
 extension PhotoNullSafeExtension on Map<String, Photo> {
   Photo get(String id) {
-    return this[id] ?? Photo.fromId(id);
+    return this[id] ?? Photo(id: "");
   }
 }
 
 extension SortEx on List {
   void sortPhotos(String sortOption, Map<String, Photo> map) {
-    switch(sortOption) {
+    switch (sortOption) {
       case SortOption.date:
         sort((a, b) {
-          return map.get(a).date.compareTo(map.get(b).date);
+          return map
+              .get(a)
+              .date
+              .compareTo(map
+              .get(b)
+              .date);
         });
         break;
       case SortOption.created:
         sort((a, b) {
-          return map.get(a).created.compareTo(map.get(b).created);
+          return map
+              .get(a)
+              .created
+              .compareTo(map
+              .get(b)
+              .created);
         });
         break;
       case SortOption.modified:
         sort((a, b) {
-          return map.get(a).modified.compareTo(map.get(b).modified);
+          return map
+              .get(a)
+              .modified
+              .compareTo(map
+              .get(b)
+              .modified);
         });
         break;
       case SortOption.deleted:
         sort((a, b) {
-          return map.get(a).deleted!.compareTo(map.get(b).deleted!);
+          return map
+              .get(a)
+              .deleted!
+              .compareTo(map
+              .get(b)
+              .deleted!);
         });
         break;
       case SortOption.title:
         sort((a, b) {
-          return map.get(a).title.toLowerCase().compareTo(map.get(b).title.toLowerCase());
+          return map
+              .get(a)
+              .title
+              .toLowerCase()
+              .compareTo(map
+              .get(b)
+              .title
+              .toLowerCase());
         });
         break;
       case SortOption.dateDescending:
         sort((a, b) {
-          return map.get(b).date.compareTo(map.get(a).date);
+          return map
+              .get(b)
+              .date
+              .compareTo(map
+              .get(a)
+              .date);
         });
         break;
       case SortOption.createdDescending:
         sort((a, b) {
-          return map.get(b).created.compareTo(map.get(a).created);
+          return map
+              .get(b)
+              .created
+              .compareTo(map
+              .get(a)
+              .created);
         });
         break;
       case SortOption.modifiedDescending:
         sort((a, b) {
-          return map.get(b).modified.compareTo(map.get(a).modified);
+          return map
+              .get(b)
+              .modified
+              .compareTo(map
+              .get(a)
+              .modified);
         });
         break;
       case SortOption.deletedDescending:
         sort((a, b) {
-          return map.get(b).deleted!.compareTo(map.get(a).deleted!);
+          return map
+              .get(b)
+              .deleted!
+              .compareTo(map
+              .get(a)
+              .deleted!);
         });
         break;
       case SortOption.titleDescending:
         sort((a, b) {
-          return map.get(b).title.toLowerCase().compareTo(map.get(a).title.toLowerCase());
+          return map
+              .get(b)
+              .title
+              .toLowerCase()
+              .compareTo(map
+              .get(a)
+              .title
+              .toLowerCase());
         });
         break;
     }

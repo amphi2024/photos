@@ -18,11 +18,38 @@ import 'models/app_cache.dart';
 import 'models/app_theme.dart';
 import 'pages/main_page.dart';
 
-void main() {
+final mainScreenKey = GlobalKey<_MyAppState>();
+
+void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   MediaKit.ensureInitialized();
 
-  runApp(const ProviderScope(child: MyApp()));
+  await appCacheData.getData();
+
+  appStorage.initialize(() async {
+    await appSettings.getData();
+
+    final photosState = await PhotosNotifier.initialized();
+    final albumsState = await AlbumsNotifier.initialized(photosState.photos);
+
+    runApp(ProviderScope(
+        overrides: [
+          photosProvider.overrideWithBuild((ref, notifier) => photosState),
+          albumsProvider.overrideWithBuild((ref, notifier) => albumsState)
+        ],
+        child: MyApp(key: mainScreenKey)));
+
+    if (App.isDesktop()) {
+      doWhenWindowReady(() {
+        appWindow.minSize = const Size(550, 300);
+        appWindow.size =
+            Size(appCacheData.windowWidth, appCacheData.windowHeight);
+        appWindow.alignment = Alignment.center;
+        appWindow.title = "Photos";
+        appWindow.show();
+      });
+    }
+  });
 }
 
 class MyApp extends ConsumerStatefulWidget {
@@ -52,39 +79,17 @@ class _MyAppState extends ConsumerState<MyApp> with WidgetsBindingObserver {
     super.dispose();
   }
 
-  bool initialized = false;
-
   @override
   void initState() {
     WidgetsBinding.instance.addObserver(this);
     appWebChannel.onWebSocketEvent = (event) {
       appStorage.syncData(event, ref);
     };
-    appCacheData.getData();
-    appStorage.initialize(() {
-      appSettings.getData();
-      ref.read(photosProvider.notifier).init();
-      ref.read(albumsProvider.notifier).init(ref.read(photosProvider).photos);
-      setState(() {
-        initialized = true;
-      });
 
-      if (appSettings.useOwnServer) {
-        appWebChannel.connectWebSocket();
-        appStorage.syncDataFromEvents(ref);
-      }
-
-      if (App.isDesktop()) {
-        doWhenWindowReady(() {
-          appWindow.minSize = const Size(550, 300);
-          appWindow.size =
-              Size(appCacheData.windowWidth, appCacheData.windowHeight);
-          appWindow.alignment = Alignment.center;
-          appWindow.title = "Photos";
-          appWindow.show();
-        });
-      }
-    });
+    if (appSettings.useOwnServer) {
+      appWebChannel.connectWebSocket();
+      appStorage.syncDataFromEvents(ref);
+    }
 
     appWebChannel.getDeviceInfo();
     if(Platform.isAndroid) {
@@ -95,28 +100,19 @@ class _MyAppState extends ConsumerState<MyApp> with WidgetsBindingObserver {
 
   @override
   Widget build(BuildContext context) {
-    if (initialized) {
-      return MaterialApp(
-        debugShowCheckedModeBanner: false,
-        theme: appSettings.appTheme.lightTheme.toThemeData(context),
-        darkTheme: appSettings.appTheme.darkTheme.toThemeData(context),
-        locale: appSettings.locale,
-        localizationsDelegates: const [
-          LocalizationDelegate(),
-          GlobalMaterialLocalizations.delegate,
-          GlobalWidgetsLocalizations.delegate,
-          GlobalCupertinoLocalizations.delegate,
-        ],
-        supportedLocales: AppLocalizations.supportedLocales,
-        home: App.isWideScreen(context) || App.isDesktop() ? const WideMainPage() : const MainPage(),
-      );
-    } else {
-      return MaterialApp(
-        debugShowCheckedModeBanner: false,
-        theme: ThemeData(scaffoldBackgroundColor: AppTheme.lightGray),
-        darkTheme: ThemeData(scaffoldBackgroundColor: AppTheme.charCoal),
-        home: const Scaffold(),
-      );
-    }
+    return MaterialApp(
+      debugShowCheckedModeBanner: false,
+      theme: appSettings.appTheme.lightTheme.toThemeData(context),
+      darkTheme: appSettings.appTheme.darkTheme.toThemeData(context),
+      locale: appSettings.locale,
+      localizationsDelegates: const [
+        LocalizationDelegate(),
+        GlobalMaterialLocalizations.delegate,
+        GlobalWidgetsLocalizations.delegate,
+        GlobalCupertinoLocalizations.delegate,
+      ],
+      supportedLocales: AppLocalizations.supportedLocales,
+      home: App.isWideScreen(context) || App.isDesktop() ? const WideMainPage() : const MainPage(),
+    );
   }
 }

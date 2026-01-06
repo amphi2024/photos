@@ -51,9 +51,7 @@ class MainPage extends ConsumerWidget {
                     if(previousIndex == FragmentIndex.settings) {
                       appSettings.save();
                     }
-                    ref
-                        .read(fragmentIndexProvider.notifier)
-                        .state = index;
+                    ref.read(fragmentIndexProvider.notifier).set(index);
 
                     if(ref.read(selectedItemsProvider) != null) {
                       ref.read(selectedItemsProvider.notifier).endSelection();

@@ -7,17 +7,17 @@ class DarkTheme extends AppThemeData {
 
   DarkTheme(
       {
-        super.backgroundColor = AppTheme.midnight,
-        super.textColor = AppTheme.white,
-        super.accentColor = AppTheme.cherryBlossom,
-        super.inactiveColor = AppTheme.inactiveGray,
-        super.noteBackgroundColor = AppTheme.charCoal,
-        super.noteTextColor = AppTheme.white,
-        super.floatingButtonBackground = AppTheme.white,
-        super.floatingButtonIconColor = AppTheme.cherryBlossom,
-        super.checkBoxColor = AppTheme.cherryBlossom,
-        super.checkBoxCheckColor = AppTheme.white,
-        super.errorColor = AppTheme.red
+        super.backgroundColor = ThemeModel.midnight,
+        super.textColor = ThemeModel.white,
+        super.accentColor = ThemeModel.cherryBlossom,
+        super.inactiveColor = ThemeModel.inactiveGray,
+        super.noteBackgroundColor = ThemeModel.charCoal,
+        super.noteTextColor = ThemeModel.white,
+        super.floatingButtonBackground = ThemeModel.white,
+        super.floatingButtonIconColor = ThemeModel.cherryBlossom,
+        super.checkBoxColor = ThemeModel.cherryBlossom,
+        super.checkBoxCheckColor = ThemeModel.white,
+        super.errorColor = ThemeModel.red
       });
 
   ThemeData toThemeData(BuildContext context) {

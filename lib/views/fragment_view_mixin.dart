@@ -12,9 +12,9 @@ mixin FragmentViewMixin<T extends ConsumerStatefulWidget> on ConsumerState<T> {
 
     scrollController.addListener(() {
       if (scrollController.offset > 60) {
-        ref.read(titleMinimizedProvider.notifier).state = true;
+        ref.read(titleMinimizedProvider.notifier).set(true);
       } else {
-        ref.read(titleMinimizedProvider.notifier).state = false;
+        ref.read(titleMinimizedProvider.notifier).set(false);
       }
     });
 

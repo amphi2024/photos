@@ -1,9 +1,12 @@
+import 'dart:io';
+
 import 'package:amphi/models/app.dart';
 import 'package:amphi/models/app_localizations.dart';
 import 'package:amphi/utils/file_name_utils.dart';
 import 'package:amphi/widgets/dialogs/confirmation_dialog.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:photos/channels/app_web_channel.dart';
 import 'package:photos/components/photo_info.dart';
 import 'package:photos/components/transfers_button.dart';
 import 'package:photos/dialogs/edit_photo_info_dialog.dart';
@@ -118,6 +121,28 @@ List<Widget> photoSelectionActions({required BuildContext context, required Widg
           showDialog(context: context, builder: (context) => const SelectAlbumDialog());
         },
         icon: const Icon(Icons.add)),
+    PopupMenuButton(itemBuilder: (context) {
+      return [
+        PopupMenuItem(child: Text("Download"), onTap: () {
+          final selectedPhotos = ref.watch(selectedItemsProvider);
+          if(selectedPhotos != null) {
+            for(var id in selectedPhotos) {
+              // appWebChannel.downloadPhotoFile(photo: ref.watch(photosProvider).photos.get(id), ref: ref);
+              print(ref.watch(photosProvider).photos.get(id).photoPath);
+            }
+          }
+        }),
+        PopupMenuItem(child: Text("Remove Download"), onTap: () {
+          final selectedPhotos = ref.watch(selectedItemsProvider);
+          if(selectedPhotos != null) {
+            for(var id in selectedPhotos) {
+              var file = File(ref.watch(photosProvider).photos.get(id).photoPath);
+              file.delete();
+            }
+          }
+        }),
+      ];
+    }),
     Visibility(
         visible: albumId != null,
         child: IconButton(

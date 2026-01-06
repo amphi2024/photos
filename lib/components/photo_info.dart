@@ -30,7 +30,7 @@ class PhotoInfo extends ConsumerWidget {
         ),
         Padding(
           padding: const EdgeInsets.only(top: 8),
-          child: ConstrainedBox(constraints: const BoxConstraints(minHeight: 400), child: Text(photo.note, maxLines: 10)),
+          child: ConstrainedBox(constraints: const BoxConstraints(minHeight: 400), child: Text(photo.note ?? "", maxLines: 10)),
         )
       ],
     );

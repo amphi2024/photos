@@ -166,7 +166,7 @@ class _PhotoPageState extends ConsumerState<PhotoPage> with TickerProviderStateM
     final id = ref.watch(currentPhotoIdProvider);
 
     return Scaffold(
-      backgroundColor: _isFullScreen ? AppTheme.black : backgroundColor,
+      backgroundColor: _isFullScreen ? ThemeModel.black : backgroundColor,
       body: Stack(
         children: [
           Positioned.fill(

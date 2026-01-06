@@ -1,14 +1,12 @@
 import 'dart:convert';
 import 'dart:io';
 
-import 'package:amphi/extensions/color_extension.dart';
 import 'package:flutter/material.dart';
-import 'package:amphi/models/app_theme_core.dart';
 
 import 'dark_theme.dart';
 import 'light_theme.dart';
 
-class AppTheme extends AppThemeCore {
+class ThemeModel {
 
   static const Color white = Color.fromRGBO(255, 255, 255, 1);
   static const Color lightGray = Color.fromRGBO(245, 245, 245, 1);
@@ -25,103 +23,5 @@ class AppTheme extends AppThemeCore {
   LightTheme lightTheme = LightTheme();
   DarkTheme darkTheme = DarkTheme();
 
-  AppTheme(
-      {
-        super.title = "",
-        super.filename = "!DEFAULT",
-        required super.created,
-        required super.modified,
-        super.path = ""
-      });
-
-  static AppTheme fromFile(File file) {
-
-      String jsonString = file.readAsStringSync();
-      Map<String, dynamic> jsonData = jsonDecode(jsonString);
-
-      AppTheme appTheme = AppTheme(
-          created: DateTime.fromMillisecondsSinceEpoch(jsonData["created"]).toLocal(),
-          modified: DateTime.fromMillisecondsSinceEpoch(jsonData["modified"]).toLocal(),
-          path: file.path,
-          filename: file.path
-              .split("/")
-              .last
-      );
-      appTheme.title = jsonData["title"];
-
-      appTheme.lightTheme.backgroundColor =
-          Color(jsonData["lightBackgroundColor"]);
-      appTheme.lightTheme.textColor = Color(jsonData["lightTextColor"]);
-      appTheme.lightTheme.accentColor = Color(jsonData["lightAccentColor"]);
-      appTheme.lightTheme.inactiveColor = Color(jsonData["lightInactiveColor"]);
-      appTheme.lightTheme.noteBackgroundColor =
-          Color(jsonData["lightNoteBackgroundColor"]);
-      appTheme.lightTheme.noteTextColor = Color(jsonData["lightNoteTextColor"]);
-      appTheme.lightTheme.floatingButtonBackground =
-          Color(jsonData["lightFloatingButtonBackground"]);
-      appTheme.lightTheme.floatingButtonIconColor =
-          Color(jsonData["lightFloatingButtonIconColor"]);
-      appTheme.lightTheme.checkBoxColor = Color(jsonData["lightCheckBoxColor"]);
-      appTheme.lightTheme.checkBoxCheckColor =
-          Color(jsonData["lightCheckBoxCheckColor"]);
-
-      appTheme.darkTheme.backgroundColor =
-          Color(jsonData["darkBackgroundColor"]);
-      appTheme.darkTheme.textColor = Color(jsonData["darkTextColor"]);
-      appTheme.darkTheme.accentColor = Color(jsonData["darkAccentColor"]);
-      appTheme.darkTheme.inactiveColor = Color(jsonData["darkInactiveColor"]);
-      appTheme.darkTheme.noteBackgroundColor =
-          Color(jsonData["darkNoteBackgroundColor"]);
-      appTheme.darkTheme.noteTextColor = Color(jsonData["darkNoteTextColor"]);
-      appTheme.darkTheme.floatingButtonBackground =
-          Color(jsonData["darkFloatingButtonBackground"]);
-      appTheme.darkTheme.floatingButtonIconColor =
-          Color(jsonData["darkFloatingButtonIconColor"]);
-      appTheme.darkTheme.checkBoxColor = Color(jsonData["darkCheckBoxColor"]);
-      appTheme.darkTheme.checkBoxCheckColor =
-          Color(jsonData["darkCheckBoxCheckColor"]);
-
-      return appTheme;
-  }
-
-  Future<void> save({bool upload = true}) async {
-    await saveFile((fileContent) {
-      //appWebChannel.uploadTheme(themeFileContent: fileContent, themeFilename: filename);
-    });
-  }
-
-  Future<void> delete({bool upload = true}) async {
-    await super.deleteFile();
-  }
-
-  Map<String, dynamic> toMap() {
-    return {
-      "title": title,
-      "created": created.toUtc().millisecondsSinceEpoch,
-      "modified": modified.toUtc().millisecondsSinceEpoch,
-
-      "lightBackgroundColor": lightTheme.backgroundColor.toHex(),
-      "lightTextColor":  lightTheme.textColor.toHex(),
-      "lightAccentColor":  lightTheme.accentColor.toHex(),
-      "lightInactiveColor":  lightTheme.inactiveColor.toHex(),
-      "lightNoteBackgroundColor":  lightTheme.noteBackgroundColor.toHex(),
-      "lightNoteTextColor":  lightTheme.noteTextColor.toHex(),
-      "lightFloatingButtonBackground":  lightTheme.floatingButtonBackground.toHex(),
-      "lightFloatingButtonIconColor":  lightTheme.floatingButtonIconColor.toHex(),
-      "lightCheckBoxColor":  lightTheme.checkBoxColor.toHex(),
-      "lightCheckBoxCheckColor":  lightTheme.checkBoxCheckColor.toHex(),
-
-      "darkBackgroundColor": darkTheme.backgroundColor.toHex(),
-      "darkTextColor":  darkTheme.textColor.toHex(),
-      "darkAccentColor":  darkTheme.accentColor.toHex(),
-      "darkInactiveColor":  darkTheme.inactiveColor.toHex(),
-      "darkNoteBackgroundColor":  darkTheme.noteBackgroundColor.toHex(),
-      "darkNoteTextColor":  darkTheme.noteTextColor.toHex(),
-      "darkFloatingButtonBackground":  darkTheme.floatingButtonBackground.toHex(),
-      "darkFloatingButtonIconColor":  darkTheme.floatingButtonIconColor.toHex(),
-      "darkCheckBoxColor":  darkTheme.checkBoxColor.toHex(),
-      "darkCheckBoxCheckColor":  darkTheme.checkBoxCheckColor.toHex(),
-    };
-  }
-
+  ThemeModel();
 }

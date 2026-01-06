@@ -28,15 +28,15 @@ class AccountButton extends ConsumerStatefulWidget {
 class AccountButtonState extends ConsumerState<AccountButton> {
 
 
-  void onUserRemoved() {
+  void onUserRemoved() async {
     appSettings.data = {};
     appWebChannel.disconnectWebSocket();
     appStorage.initPaths();
     appSettings.getData();
     appWebChannel.connectWebSocket();
     ref.read(photosProvider.notifier).clear();
-    ref.read(photosProvider.notifier).init();
-    ref.read(albumsProvider.notifier).init(ref.read(photosProvider).photos);
+    await ref.read(photosProvider.notifier).rebuild();
+    ref.read(albumsProvider.notifier).rebuild();
     setState(() {
 
     });
@@ -46,14 +46,14 @@ class AccountButtonState extends ConsumerState<AccountButton> {
     appState.onServerAddressChanged();
   }
 
-  void onUserAdded() {
+  void onUserAdded() async {
     appSettings.data = {};
     appWebChannel.disconnectWebSocket();
     appStorage.initPaths();
     appSettings.getData();
     ref.read(photosProvider.notifier).clear();
-    ref.read(photosProvider.notifier).init();
-    ref.read(albumsProvider.notifier).init(ref.read(photosProvider).photos);
+    await ref.read(photosProvider.notifier).rebuild();
+    ref.read(albumsProvider.notifier).rebuild();
     setState(() {
 
     });
@@ -67,14 +67,13 @@ class AccountButtonState extends ConsumerState<AccountButton> {
 
   }
 
-  void onSelectedUserChanged(User user) {
+  void onSelectedUserChanged(User user) async {
     appSettings.data = {};
     appWebChannel.disconnectWebSocket();
     appStorage.initPaths();
     appSettings.getData();
-    ref.read(photosProvider.notifier).clear();
-    ref.read(photosProvider.notifier).init();
-    ref.read(albumsProvider.notifier).init(ref.read(photosProvider).photos);
+    await ref.read(photosProvider.notifier).rebuild();
+    ref.read(albumsProvider.notifier).rebuild();
     appStorage.syncDataFromEvents(ref);
     setState(() {
 

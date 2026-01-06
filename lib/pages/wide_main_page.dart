@@ -28,7 +28,7 @@ class WideMainPage extends ConsumerWidget {
     final selectingItems = ref.watch(selectedItemsProvider) != null;
     final actions = appbarActions(context: context, fragmentIndex: ref.watch(fragmentIndexProvider), ref: ref, selectingItems: selectingItems);
     final currentPhotoId = ref.watch(currentPhotoIdProvider);
-    double showingPhotoWidth = MediaQuery.of(context).size.width / 1.75;
+    double showingPhotoWidth = MediaQuery.of(context).size.width - 400;
 
     final colors = CustomWindowButtonColors(
       iconMouseOver: Theme.of(context).textTheme.bodyMedium?.color,

@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:amphi/utils/path_utils.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:photos/database/database_helper.dart';
 import 'package:photos/models/app_cache.dart';
 import 'package:photos/models/app_storage.dart';
 import 'package:photos/providers/photos_provider.dart';
@@ -56,8 +57,32 @@ class AlbumsState {
   }
 }
 
-class AlbumsNotifier extends StateNotifier<AlbumsState> {
-  AlbumsNotifier() : super(AlbumsState({}, []));
+class AlbumsNotifier extends Notifier<AlbumsState> {
+  @override
+  AlbumsState build() {
+    return AlbumsState({}, []);
+  }
+
+  static Future<AlbumsState> initialized(Map<String, Photo> photos) async {
+    final Map<String, Album> albums = {};
+    final List<String> idList = [];
+
+    final database = await databaseHelper.database;
+    final List<Map<String, dynamic>> list = await database.rawQuery("SELECT * FROM albums", []);
+
+    for(var data in list) {
+      final album = Album.fromMap(data);
+      album.photos.sortPhotos(appCacheData.sortOption(album.id), photos);
+      albums[album.id] = album;
+      idList.add(album.id);
+    }
+
+    return AlbumsState(albums, idList);
+  }
+
+  Future<void> rebuild() async {
+    state = await initialized(ref.read(photosProvider).photos);
+  }
 
   void insertAlbum(Album album) {
     final albums = {...state.albums, album.id: album};
@@ -79,31 +104,9 @@ class AlbumsNotifier extends StateNotifier<AlbumsState> {
     state1.sortAlbums();
     state = state1;
   }
-
-  void init(Map<String, Photo> photos) {
-    final Map<String, Album> albums = {};
-    final List<String> idList = [];
-    var albumsDirectory = Directory(appStorage.albumsPath);
-    if(!albumsDirectory.existsSync()) {
-      return;
-    }
-    for(var file in albumsDirectory.listSync()) {
-      if(file is File) {
-        final filename = PathUtils.basename(file.path);
-        final album = Album.fromFilename(filename);
-        album.photos.sortPhotos(appCacheData.sortOption(album.id), photos);
-        albums[album.id] = album;
-        idList.add(album.id);
-      }
-    }
-    
-    state = AlbumsState(albums, idList);
-  }
 }
 
-final albumsProvider = StateNotifierProvider<AlbumsNotifier, AlbumsState>((ref) {
-  return AlbumsNotifier();
-});
+final albumsProvider = NotifierProvider<AlbumsNotifier, AlbumsState>(AlbumsNotifier.new);
 
 extension AlbumNullSafeExtension on Map<String, Album> {
   Album get(String id) {

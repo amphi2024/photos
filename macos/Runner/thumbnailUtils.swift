@@ -22,7 +22,7 @@ func generateThumbnail(filePath: String, thumbnailPath: String) {
                 }
             } else {
                 if let image = NSImage(contentsOf: URL(fileURLWithPath: filePath)) {
-                            let maxDimension: CGFloat = 100
+                            let maxDimension: CGFloat = 200
                             let aspectWidth = maxDimension / image.size.width
                             let aspectHeight = maxDimension / image.size.height
                             let aspectRatio = min(aspectWidth, aspectHeight)

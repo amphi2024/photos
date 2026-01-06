@@ -64,13 +64,13 @@ class DesktopNavMenu extends ConsumerWidget {
                         icon: Icons.photo_library_outlined,
                         title: AppLocalizations.of(context).get("@library"),
                         onPressed: () {
-                          ref.read(fragmentIndexProvider.notifier).state = 0;
+                          ref.read(fragmentIndexProvider.notifier).set(0);
                         }),
                     _MenuItem(
                         icon: Icons.delete,
                         title: AppLocalizations.of(context).get("@trash"),
                         onPressed: () {
-                          ref.read(fragmentIndexProvider.notifier).state = 2;
+                          ref.read(fragmentIndexProvider.notifier).set(2);
                         }),
                     Row(
                       children: [
@@ -94,9 +94,9 @@ class DesktopNavMenu extends ConsumerWidget {
                                   icon: Icons.photo_album,
                                   title: album.title,
                                   onPressed: () {
-                                    ref.read(currentAlbumIdProvider.notifier).state = album.id;
+                                    ref.read(currentAlbumIdProvider.notifier).set(album.id);
                                     if (ref.watch(fragmentIndexProvider) != FragmentIndex.album) {
-                                      ref.read(fragmentIndexProvider.notifier).state = FragmentIndex.album;
+                                      ref.read(fragmentIndexProvider.notifier).set(FragmentIndex.album);
                                     }
                                   });
                             }))

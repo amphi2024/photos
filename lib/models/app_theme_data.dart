@@ -18,18 +18,18 @@ class AppThemeData {
   Color menuBackground;
 
   AppThemeData({
-    this.backgroundColor = AppTheme.midnight,
-    this.textColor = AppTheme.white,
-    this.accentColor = AppTheme.cherryBlossom,
-    this.inactiveColor = AppTheme.inactiveGray,
-    this.noteBackgroundColor = AppTheme.charCoal,
-    this.noteTextColor = AppTheme.white,
-    this.floatingButtonBackground = AppTheme.white,
-    this.floatingButtonIconColor = AppTheme.cherryBlossom,
-    this.checkBoxColor = AppTheme.cherryBlossom,
-    this.checkBoxCheckColor = AppTheme.white,
-    this.errorColor = AppTheme.red,
-    this.menuBackground = AppTheme.charCoal
+    this.backgroundColor = ThemeModel.midnight,
+    this.textColor = ThemeModel.white,
+    this.accentColor = ThemeModel.cherryBlossom,
+    this.inactiveColor = ThemeModel.inactiveGray,
+    this.noteBackgroundColor = ThemeModel.charCoal,
+    this.noteTextColor = ThemeModel.white,
+    this.floatingButtonBackground = ThemeModel.white,
+    this.floatingButtonIconColor = ThemeModel.cherryBlossom,
+    this.checkBoxColor = ThemeModel.cherryBlossom,
+    this.checkBoxCheckColor = ThemeModel.white,
+    this.errorColor = ThemeModel.red,
+    this.menuBackground = ThemeModel.charCoal
   });
 
   ThemeData themeData({required Brightness brightness, required BuildContext context}) {
@@ -76,14 +76,14 @@ class AppThemeData {
           if (states.contains(WidgetState.selected)) {
             return checkBoxCheckColor;
           } else {
-            return AppTheme.transparent;
+            return ThemeModel.transparent;
           }
         }),
         fillColor: WidgetStateProperty.resolveWith((states) {
           if (states.contains(WidgetState.selected)) {
             return checkBoxColor;
           } else {
-            return AppTheme.transparent;
+            return ThemeModel.transparent;
           }
         }),
         shape: RoundedRectangleBorder(
@@ -117,7 +117,7 @@ class AppThemeData {
         secondary: accentColor,
         onSecondary: textColor,
         onError: accentColor,
-        error: AppTheme.red,
+        error: ThemeModel.red,
         surface: noteBackgroundColor,
         onSurface: noteTextColor,
       ),

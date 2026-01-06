@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'dart:io';
 import 'dart:math';
 
+import 'package:amphi/utils/json_value_extractor.dart';
 import 'package:amphi/utils/path_utils.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -35,90 +36,46 @@ class Photo {
     }
   }
 
-  late String thumbnailPath;
-  late String path;
-  String id;
+   String thumbnailPath = "";
+   String path = "";
   String photoPath = "";
+
+  String id;
   Map<String, dynamic> data = {};
+  String title = "";
+  List<String> tags = [];
+  DateTime created;
+  DateTime modified;
+  DateTime date;
+  DateTime? deleted;
+  String mimeType = "";
+  String sha256 = "";
+  String? note;
 
-  String get title => data["title"] ?? "";
-  set title(String value) => data["title"] = value;
+  Photo({
+    required this.id,
+    this.title = "",
+    DateTime? created,
+    DateTime? modified,
+    DateTime? date,
+    this.deleted
+  }) : created = created ?? DateTime.now(),
+        modified = modified ?? DateTime.now(),
+  date = date ?? DateTime.now();
 
-  List<dynamic> get tags => data.putIfAbsent("tags", () => []);
-  set tags(List<dynamic> value) => data["tags"] = value;
-
-  DateTime get created => DateTime.fromMillisecondsSinceEpoch(data["created"] ?? 0).toLocal();
-  set created(DateTime dateTime) {
-    data["created"] = dateTime.toUtc().millisecondsSinceEpoch;
-  }
-
-  DateTime get modified => DateTime.fromMillisecondsSinceEpoch(data["modified"] ?? 0).toLocal();
-  set modified(DateTime dateTime) {
-    data["modified"] = dateTime.toUtc().millisecondsSinceEpoch;
-  }
-
-  DateTime get date => DateTime.fromMillisecondsSinceEpoch(data["date"] ?? 0).toLocal();
-  set date(DateTime dateTime) {
-    data["date"] = dateTime.toUtc().millisecondsSinceEpoch;
-  }
-
-  DateTime? get deleted {
-    var value = data["deleted"];
-    if(value is int) {
-      return DateTime.fromMillisecondsSinceEpoch(value).toLocal();
-    }
-    return null;
-  }
-
-  set deleted(DateTime? dateTime) {
-    if(dateTime == null) {
-      data.remove("deleted");
-    }
-    else {
-      data["deleted"] = dateTime.toUtc().millisecondsSinceEpoch;
-    }
-  }
-
-  String get mimeType => data["mimeType"] ?? "";
-  set mimeType(String value) => data["mimeType"] = value;
-
-  String get sha256 => data["sha256"] ?? "";
-  set sha256(String value) => data["sha256"] = value;
-
-  String get note => data.putIfAbsent("note", () => "");
-  set note(String value) => data["note"] = value;
-
-  static String getFilePathById(String filename) {
-    return PathUtils.join(appStorage.photosPath, filename.substring(0, 1), filename.substring(1, 2), filename);
-  }
-
-  Photo.fromId(this.id, {Map<String, dynamic>? data}) {
-    if(id.length < 2) {
-      path = "";
-    }
-    else {
-      path = PathUtils.join(appStorage.photosPath, id.substring(0, 1), id.substring(1, 2) , id);
-    }
-    if(data != null) {
-      this.data = data;
-      getPhotoPath();
-    }
-    else {
-      final infoFile = File(PathUtils.join(path, "info.json"));
-      if(infoFile.existsSync()) {
-        try {
-          this.data = jsonDecode(infoFile.readAsStringSync());
-          getPhotoPath();
-        }
-        catch(e) {
-          photoPath = PathUtils.join(path, "photo");
-        }
-      }
-      else {
-        photoPath = PathUtils.join(path, "photo");
-      }
-    }
-    thumbnailPath = PathUtils.join(path, "thumbnail.jpg");
+  Photo.fromMap(Map<String, dynamic> data)
+      : id = data["id"],
+        title = data["title"],
+        created = data.getDateTime("created"),
+        modified = data.getDateTime("modified"),
+        date = data.getDateTime("date"),
+        deleted = data.getNullableDateTime("deleted"),
+        mimeType = data["mime_type"] ?? data["mimeType"],
+  sha256 = data["sha256"],
+  note = data["note"] {
+    final fileType = mimeType.split("/").last;
+    photoPath = PathUtils.join(appStorage.libraryPath, id[0], id[1], id, "photo.$fileType");
+    thumbnailPath = PathUtils.join(appStorage.libraryPath, id[0], id[1], id, "thumbnail.jpg");
   }
 
   void getPhotoPath() {
@@ -127,10 +84,11 @@ class Photo {
   }
 
   static Future<Photo> createdPhoto(String originalPath, WidgetRef ref) async {
-    var id = generatedId(appStorage.photosPath);
+    var id = generatedId(appStorage.libraryPath);
 
     var fileExtension = PathUtils.extension(originalPath);
-    final photo = Photo.fromId(id);
+    // final photo = Photo.fromId(id);
+    final photo = Photo(id: "");
     var directory = Directory(photo.path);
     if(!await directory.exists()) {
       await directory.create(recursive: true);
@@ -158,7 +116,7 @@ class Photo {
     photo.sha256 = digest.toString();
 
     await photo.save();
-    await appWebChannel.uploadPhoto(photo: photo, ref: ref);
+    appWebChannel.uploadPhoto(photo: photo, ref: ref);
     photo.generateThumbnail();
     return photo;
   }

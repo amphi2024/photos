@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'dart:io';
 import 'dart:math';
 
+import 'package:amphi/utils/json_value_extractor.dart';
 import 'package:amphi/utils/path_utils.dart';
 import 'package:photos/channels/app_web_channel.dart';
 import 'package:photos/models/photo.dart';
@@ -20,10 +21,9 @@ class Album {
       result += chars[Random().nextInt(chars.length)];
     }
 
-    if(Directory(PathUtils.join(path, result)).existsSync()) {
+    if (Directory(PathUtils.join(path, result)).existsSync()) {
       return generatedId(path);
-    }
-    else {
+    } else {
       return result;
     }
   }
@@ -35,48 +35,45 @@ class Album {
   late String path;
   String id;
   Map<String, dynamic> data = {};
+  String title = "";
+  DateTime created;
+  DateTime modified;
+  DateTime? deleted;
+  List<String> photos = [];
+  int? coverPhotoIndex;
+  String? note;
 
-  String get filename => data["filename"] ?? "";
-  set filename(String value) => data["filename"] = value;
+  Album({required this.id, this.title = "", DateTime? created, DateTime? modified, this.deleted})
+      : created = created ?? DateTime.now(),
+        modified = modified ?? DateTime.now();
 
-  String get title => data.putIfAbsent("title", () => "");
-  set title(String value) => data["title"] = value;
-
-  List<dynamic> get photos =>  data.putIfAbsent("photos", () => []);
-  set photos(List<dynamic> value) => data["photos"] = value;
+  Album.fromMap(Map<String, dynamic> data)
+      : id = data["id"],
+        title = data["title"],
+        created = data.getDateTime("created"),
+        modified = data.getDateTime("modified"),
+        deleted = data.getNullableDateTime("deleted"),
+        photos = data.getStringList("photos"),
+        note = data["note"],
+        coverPhotoIndex = data["cover_photo_index"];
 
   List<dynamic> getVisiblePhotos(Map<String, Photo> photoMap) {
     return photos.where((id) => photoMap[id]?.deleted == null && photoMap.containsKey(id)).toList();
   }
 
-  DateTime get created => DateTime.fromMillisecondsSinceEpoch(data.putIfAbsent("created", () => 0)).toLocal();
-  set created(DateTime dateTime) {
-    data["created"] = dateTime.toUtc().millisecondsSinceEpoch;
-  }
-
-  DateTime get modified => DateTime.fromMillisecondsSinceEpoch(data.putIfAbsent("modified", () => 0)).toLocal();
-  set modified(DateTime dateTime) {
-    data["modified"] = dateTime.toUtc().millisecondsSinceEpoch;
-  }
-
-  String get mimeType => data["mimeType"] ?? "";
-  set mimeType(String value) => data["mimeType"] = value;
-
-  String get sha256 => data["sha256"] ?? "";
-  set sha256(String value) => data["sha256"] = value;
-
-  Album.fromFilename(String filename, {Map<String, dynamic>? data}) : id = filename.split(".").first {
+  Album.fromFilename(String filename, {Map<String, dynamic>? data})
+      : id = filename.split(".").first,
+        created = DateTime.now(),
+        modified = DateTime.now() {
     path = PathUtils.join(appStorage.albumsPath, filename);
-    if(data != null) {
+    if (data != null) {
       this.data = data;
-    }
-    else {
+    } else {
       final infoFile = File(path);
-      if(infoFile.existsSync()) {
+      if (infoFile.existsSync()) {
         try {
           this.data = jsonDecode(infoFile.readAsStringSync());
-        }
-        catch(e) {
+        } catch (e) {
           this.data = {};
         }
       }
@@ -86,7 +83,7 @@ class Album {
   Future<void> save({bool upload = true}) async {
     final file = File(path);
     await file.writeAsString(jsonEncode(data));
-    if(upload && appSettings.useOwnServer) {
+    if (upload && appSettings.useOwnServer) {
       appWebChannel.uploadAlbum(album: this);
     }
   }
@@ -94,9 +91,8 @@ class Album {
   Future<void> delete({bool upload = true}) async {
     final file = File(path);
     await file.delete();
-    if(upload && appSettings.useOwnServer) {
+    if (upload && appSettings.useOwnServer) {
       appWebChannel.deleteAlbum(album: this);
     }
   }
-
 }
