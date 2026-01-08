@@ -34,8 +34,9 @@ Future<void> migratePhotos(Database db) async {
     }
   }
 
-  // TODO: Add logic to rename the photos directory to library when the app is ready for update
   await batch.commit();
+
+  await directory.rename(PathUtils.join(appStorage.selectedUser.storagePath, "library"));
 }
 
 Map<String, dynamic> _parsedLegacyPhoto(String id, Map<String, dynamic> map) {

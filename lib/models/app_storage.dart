@@ -28,8 +28,7 @@ class AppStorage extends AppStorageCore {
     super.initPaths();
     themesPath = PathUtils.join(selectedUser.storagePath, "themes");
 
-    // TODO: change it to library when the app is ready for update
-    libraryPath = PathUtils.join(selectedUser.storagePath, "photos");
+    libraryPath = PathUtils.join(selectedUser.storagePath, "library");
     albumsPath = PathUtils.join(selectedUser.storagePath, "albums");
 
     createDirectoryIfNotExists(themesPath);
