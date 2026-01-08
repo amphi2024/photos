@@ -38,12 +38,16 @@ class _VideoPlayerState extends ConsumerState<VideoPlayer> {
     videoController = VideoController(player);
     player.open(Media(widget.photo.photoPath), play: false);
     player.stream.error.listen((event) {
-      // player.open(Media("${appWebChannel.serverAddress}/photos/${widget.photo.id}", httpHeaders: {
-      //   "Authorization": appWebChannel.token
-      // }), play: false);
-      setState(() {
-        errorCaused = true;
-      });
+      if(event.contains("file")) {
+        player.open(Media("${appWebChannel.serverAddress}/photos/${widget.photo.id}", httpHeaders: {
+          "Authorization": appWebChannel.token
+        }), play: false);
+      }
+      else {
+        setState(() {
+          errorCaused = true;
+        });
+      }
     });
     super.initState();
   }
