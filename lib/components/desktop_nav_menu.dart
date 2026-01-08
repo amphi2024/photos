@@ -1,14 +1,17 @@
 import 'package:amphi/models/app.dart';
 import 'package:amphi/models/app_localizations.dart';
-import 'package:amphi/utils/file_name_utils.dart';
 import 'package:bitsdojo_window/bitsdojo_window.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:photos/components/transfers_button.dart';
 import 'package:photos/models/app_cache.dart';
 import 'package:photos/pages/app_bar/app_bar_popup_menu.dart';
+import 'package:photos/utils/generated_id.dart';
 import 'package:photos/utils/photo_utils.dart';
+import 'package:amphi/widgets/account/account_button.dart';
 
+import '../channels/app_method_channel.dart';
+import '../channels/app_web_channel.dart';
 import '../dialogs/edit_album_dialog.dart';
 import '../models/album.dart';
 import '../models/app_settings.dart';
@@ -16,8 +19,8 @@ import '../models/app_storage.dart';
 import '../models/fragment_index.dart';
 import '../providers/albums_provider.dart';
 import '../providers/providers.dart';
+import '../utils/account_utils.dart';
 import '../views/settings_view.dart';
-import 'account_button.dart';
 
 class DesktopNavMenu extends ConsumerWidget {
   const DesktopNavMenu({super.key});
@@ -44,9 +47,37 @@ class DesktopNavMenu extends ConsumerWidget {
                       return const SizedBox(height: 50);
                     }
                   })),
-                  AccountButton(onLoggedIn: () {
-                    appStorage.refreshDataWithServer(ref);
-                  }),
+                  AccountButton(onLoggedIn: ({required id, required token, required username}) {
+                    onLoggedIn(id: id,
+                        token: token,
+                        username: username,
+                        context: context,
+                        ref: ref);
+                  },
+                      iconSize: 30,
+                      profileIconSize: 15,
+                      wideScreenIconSize: 25,
+                      wideScreenProfileIconSize: 15,
+                      appWebChannel: appWebChannel,
+                      appStorage: appStorage,
+                      appCacheData: appCacheData,
+                      onUserRemoved: () {
+                        onUserRemoved(ref);
+                      },
+                      onUserAdded: () {
+                        onUserAdded(ref);
+                      },
+                      onUsernameChanged: () {
+                        onUsernameChanged(ref);
+                      },
+                      onSelectedUserChanged: (user) {
+                        onSelectedUserChanged(user, ref);
+                      },
+                      setAndroidNavigationBarColor: () {
+                        appMethodChannel.setNavigationBarColor(Theme
+                            .of(context)
+                            .scaffoldBackgroundColor);
+                      }),
                   IconButton(
                       onPressed: () {
                         appStorage.refreshDataWithServer(ref);
@@ -148,14 +179,17 @@ class DesktopNavMenu extends ConsumerWidget {
                           ),
                           PopupMenuItem(
                             height: 30,
-                            onTap: () {
-                              final filename = FilenameUtils.generatedFileName(".album", appStorage.albumsPath);
-                              final album = Album.fromFilename(filename);
-                              showDialog(
-                                  context: context,
-                                  builder: (context) => EditAlbumDialog(
-                                        album: album,
-                                      ));
+                            onTap: () async {
+                              final id = await generatedAlbumId();
+                              final album = Album(id: id);
+                              if(context.mounted) {
+                                showDialog(
+                                    context: context,
+                                    builder: (context) =>
+                                        EditAlbumDialog(
+                                          album: album,
+                                        ));
+                              }
                             },
                             child: Text(AppLocalizations.of(context).get("@new_album")),
                           ),
