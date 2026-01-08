@@ -15,7 +15,6 @@ import 'package:photos/providers/albums_provider.dart';
 import 'package:photos/providers/photos_provider.dart';
 import 'channels/app_web_channel.dart';
 import 'models/app_cache.dart';
-import 'models/app_theme.dart';
 import 'pages/main_page.dart';
 
 final mainScreenKey = GlobalKey<_MyAppState>();

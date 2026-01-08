@@ -4,7 +4,6 @@ import 'package:amphi/models/app_localizations.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:photos/models/app_settings.dart';
-import 'package:photos/models/app_state.dart';
 import 'package:photos/views/fragment_view_mixin.dart';
 
 import '../channels/app_method_channel.dart';
@@ -18,12 +17,6 @@ class SettingsView extends ConsumerStatefulWidget {
 }
 
 class _SettingsViewState extends ConsumerState<SettingsView> with FragmentViewMixin {
-
-  @override
-  void initState() {
-    appState.onSettingsChanged = setState;
-    super.initState();
-  }
 
   @override
   Widget build(BuildContext context) {

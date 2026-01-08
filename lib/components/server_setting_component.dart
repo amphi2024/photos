@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:amphi/models/app_localizations.dart';
 import 'package:percent_indicator/circular_percent_indicator.dart';
 import 'package:photos/models/app_settings.dart';
-import 'package:photos/models/app_state.dart';
 
 import '../channels/app_web_channel.dart';
 import '../utils/bytes_utils.dart';
@@ -50,9 +49,6 @@ class _ServerSettingComponentState extends State<ServerSettingComponent> {
   @override
   void initState() {
     testConnection();
-    appState.onServerAddressChanged = () {
-        controller.text = appSettings.serverAddress;
-    };
     super.initState();
   }
 
