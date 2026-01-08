@@ -13,6 +13,7 @@ import 'package:photos/models/app_storage.dart';
 import 'package:photos/pages/wide_main_page.dart';
 import 'package:photos/providers/albums_provider.dart';
 import 'package:photos/providers/photos_provider.dart';
+import 'package:sqflite_common_ffi/sqflite_ffi.dart';
 import 'channels/app_web_channel.dart';
 import 'models/app_cache.dart';
 import 'pages/main_page.dart';
@@ -20,6 +21,10 @@ import 'pages/main_page.dart';
 final mainScreenKey = GlobalKey<_MyAppState>();
 
 void main() async {
+  if(Platform.isWindows || Platform.isLinux) {
+    sqfliteFfiInit();
+  }
+
   WidgetsFlutterBinding.ensureInitialized();
   MediaKit.ensureInitialized();
 
