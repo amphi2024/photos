@@ -14,7 +14,4 @@ class AppState {
 
   final pageController = PageController();
 
-  late void Function(void Function()) onSettingsChanged;
-  late void Function() onServerAddressChanged;
-
 }
