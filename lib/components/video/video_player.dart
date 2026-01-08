@@ -38,7 +38,7 @@ class _VideoPlayerState extends ConsumerState<VideoPlayer> {
     videoController = VideoController(player);
     player.open(Media(widget.photo.photoPath), play: false);
     player.stream.error.listen((event) {
-      if(event.contains("file")) {
+      if(event.contains(widget.photo.photoPath)) {
         player.open(Media("${appWebChannel.serverAddress}/photos/${widget.photo.id}", httpHeaders: {
           "Authorization": appWebChannel.token
         }), play: false);
