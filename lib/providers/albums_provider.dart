@@ -1,10 +1,7 @@
-import 'dart:io';
 
-import 'package:amphi/utils/path_utils.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:photos/database/database_helper.dart';
 import 'package:photos/models/app_cache.dart';
-import 'package:photos/models/app_storage.dart';
 import 'package:photos/providers/photos_provider.dart';
 import '../models/album.dart';
 import '../models/photo.dart';
@@ -110,6 +107,6 @@ final albumsProvider = NotifierProvider<AlbumsNotifier, AlbumsState>(AlbumsNotif
 
 extension AlbumNullSafeExtension on Map<String, Album> {
   Album get(String id) {
-    return this[id] ?? Album.fromFilename("$id.album");
+    return this[id] ?? Album(id: "");
   }
 }

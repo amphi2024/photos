@@ -1,6 +1,5 @@
 import 'dart:convert';
 import 'dart:io';
-import 'dart:math';
 
 import 'package:amphi/utils/json_value_extractor.dart';
 import 'package:amphi/utils/path_utils.dart';
@@ -11,37 +10,16 @@ import 'package:photos/channels/app_method_channel.dart';
 import 'package:photos/channels/app_web_channel.dart';
 import 'package:crypto/crypto.dart' as crypto;
 import 'package:photos/models/app_settings.dart';
+import 'package:photos/utils/generated_id.dart';
+import 'package:sqflite/sqflite.dart';
+import '../database/database_helper.dart';
 import 'app_storage.dart';
 
 class Photo {
-
-  static String generatedId(String path) {
-    int length = Random().nextInt(5) + 10;
-
-    const String chars = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
-
-    String firstChar = chars[Random().nextInt(chars.length)];
-    String secondChar = chars[Random().nextInt(chars.length)];
-
-    String result = "$firstChar$secondChar";
-    for (int i = 0; i < length; i++) {
-      result += chars[Random().nextInt(chars.length)];
-    }
-
-    if(Directory(PathUtils.join(path, firstChar, secondChar ,result)).existsSync()) {
-      return generatedId(path);
-    }
-    else {
-      return result;
-    }
-  }
-
-   String thumbnailPath = "";
-   String path = "";
+  String thumbnailPath = "";
   String photoPath = "";
 
   String id;
-  Map<String, dynamic> data = {};
   String title = "";
   List<String> tags = [];
   DateTime created;
@@ -52,16 +30,14 @@ class Photo {
   String sha256 = "";
   String? note;
 
-  Photo({
-    required this.id,
-    this.title = "",
-    DateTime? created,
-    DateTime? modified,
-    DateTime? date,
-    this.deleted
-  }) : created = created ?? DateTime.now(),
+  Photo({required this.id, this.title = "", DateTime? created, DateTime? modified, DateTime? date, this.deleted})
+      : created = created ?? DateTime.now(),
         modified = modified ?? DateTime.now(),
-  date = date ?? DateTime.now();
+        date = date ?? DateTime.now() {
+    final fileType = mimeType.split("/").last;
+    photoPath = PathUtils.join(appStorage.libraryPath, id[0], id[1], id, "photo.$fileType");
+    thumbnailPath = PathUtils.join(appStorage.libraryPath, id[0], id[1], id, "thumbnail.jpg");
+  }
 
   Photo.fromMap(Map<String, dynamic> data)
       : id = data["id"],
@@ -71,30 +47,24 @@ class Photo {
         date = data.getDateTime("date"),
         deleted = data.getNullableDateTime("deleted"),
         mimeType = data["mime_type"] ?? data["mimeType"],
-  sha256 = data["sha256"],
-  note = data["note"] {
+        sha256 = data["sha256"],
+        note = data["note"] {
     final fileType = mimeType.split("/").last;
     photoPath = PathUtils.join(appStorage.libraryPath, id[0], id[1], id, "photo.$fileType");
     thumbnailPath = PathUtils.join(appStorage.libraryPath, id[0], id[1], id, "thumbnail.jpg");
   }
 
-  void getPhotoPath() {
-    final fileType = mimeType.split("/").last;
-    photoPath = PathUtils.join(path, "photo.$fileType");
-  }
-
   static Future<Photo> createdPhoto(String originalPath, WidgetRef ref) async {
-    var id = generatedId(appStorage.libraryPath);
+    final id = await generatedPhotoId();
 
-    var fileExtension = PathUtils.extension(originalPath);
-    // final photo = Photo.fromId(id);
-    final photo = Photo(id: "");
-    var directory = Directory(photo.path);
-    if(!await directory.exists()) {
+    final fileExtension = PathUtils.extension(originalPath);
+    final photo = Photo(id: id);
+    var directory = Directory(PathUtils.join(appStorage.libraryPath, id[0], id[1], id));
+    if (!await directory.exists()) {
       await directory.create(recursive: true);
     }
     var originalFile = File(originalPath);
-    var photoFile = File(PathUtils.join(photo.path, "photo${fileExtension}"));
+    var photoFile = File(PathUtils.join(directory.path, "photo$fileExtension"));
     var bytes = await originalFile.readAsBytes();
     await photoFile.writeAsBytes(bytes);
 
@@ -105,10 +75,9 @@ class Photo {
     photo.date = DateTime.now();
 
     final fileType = fileExtension.split(".").last;
-    if(isImageExtension(fileType)) {
+    if (isImageExtension(fileType)) {
       photo.mimeType = "image/$fileType";
-    }
-    else {
+    } else {
       photo.mimeType = "video/$fileType";
     }
 
@@ -141,24 +110,32 @@ class Photo {
     return digest.toString() == expectedSha256;
   }
 
-  Future<void> save({bool upload = true}) async {
-    final directory = Directory(path);
-    if(!await directory.exists()) {
-      await directory.create(recursive: true);
+  Future<void> save({bool upload = true, WidgetRef? ref}) async {
+    if (id.isEmpty) {
+      id = await generatedPhotoId();
     }
-    var infoFile = File(PathUtils.join(path, "info.json"));
-    await infoFile.writeAsString(jsonEncode(data));
-    if(upload && appSettings.useOwnServer) {
-      await appWebChannel.uploadPhotoInfo(photo: this);
+    final database = await databaseHelper.database;
+    await database.insert("songs", toSqlInsertMap(), conflictAlgorithm: ConflictAlgorithm.replace);
+    if (upload) {
+      if(upload && appSettings.useOwnServer) {
+        await appWebChannel.uploadPhotoInfo(photo: this);
+      }
     }
   }
 
   Future<void> delete({bool upload = true}) async {
-    final directory = Directory(path);
-    if(await directory.exists()) {
+    if(id.isEmpty) {
+      return;
+    }
+
+    final database = await databaseHelper.database;
+    await database.delete("photos", where: "id = ?", whereArgs: [id]);
+
+    final directory = Directory(PathUtils.join(appStorage.libraryPath, id[0], id[1], id));
+    if (await directory.exists()) {
       await directory.delete(recursive: true);
     }
-    if(upload && appSettings.useOwnServer) {
+    if(upload) {
       await appWebChannel.deletePhoto(photo: this);
     }
   }
@@ -172,16 +149,37 @@ class Photo {
   }
 
   Future<void> deleteThumbnail() async {
-    // final file = File(thumbnailPath);
-    // if(await file.exists()) {
-    //   await file.delete();
-    // }
+    final file = File(thumbnailPath);
+    if (await file.exists()) {
+      await file.delete();
+    }
   }
 
+  Map<String, dynamic> _toMap() {
+    return {
+      "id": id,
+      "title": title,
+      "created": created.toUtc().millisecondsSinceEpoch,
+      "modified": modified.toUtc().millisecondsSinceEpoch,
+      "date": date.toUtc().millisecondsSinceEpoch,
+      "deleted": deleted?.toUtc().millisecondsSinceEpoch,
+      "mime_type": mimeType,
+      "sha256": sha256,
+      "note": note
+    };
+  }
+
+  Map<String, dynamic> toSqlInsertMap() {
+    return {..._toMap(), "tags": jsonEncode(tags)};
+  }
+
+  Map<String, dynamic> toJsonBody() {
+    return {..._toMap(), "tags": tags};
+  }
 }
 
 bool isImageExtension(String fileExtension) {
-  const videoExtensions = { "mp4", "mov", "avi", "wmv", "mkv", "flv", "webm", "mpeg", "mpg", "m4v", "3gp", "3g2", "f4v", "swf", "vob", "ts"};
+  const videoExtensions = {"mp4", "mov", "avi", "wmv", "mkv", "flv", "webm", "mpeg", "mpg", "m4v", "3gp", "3g2", "f4v", "swf", "vob", "ts"};
   return !videoExtensions.contains(fileExtension);
 }
 

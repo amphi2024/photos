@@ -2,26 +2,29 @@ import 'dart:io';
 
 import 'package:amphi/models/app.dart';
 import 'package:amphi/models/app_localizations.dart';
-import 'package:amphi/utils/file_name_utils.dart';
+import 'package:amphi/widgets/account/account_button.dart';
 import 'package:amphi/widgets/dialogs/confirmation_dialog.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:photos/channels/app_web_channel.dart';
 import 'package:photos/components/photo_info.dart';
 import 'package:photos/components/transfers_button.dart';
 import 'package:photos/dialogs/edit_photo_info_dialog.dart';
 import 'package:photos/pages/app_bar/app_bar_popup_menu.dart';
 import 'package:photos/providers/current_photo_id_provider.dart';
+import 'package:photos/utils/generated_id.dart';
 
-import '../../components/account_button.dart';
+import '../../channels/app_method_channel.dart';
+import '../../channels/app_web_channel.dart';
 import '../../dialogs/edit_album_dialog.dart';
 import '../../dialogs/select_album_dialog.dart';
 import '../../models/album.dart';
+import '../../models/app_cache.dart';
 import '../../models/app_storage.dart';
 import '../../models/fragment_index.dart';
 import '../../providers/albums_provider.dart';
 import '../../providers/photos_provider.dart';
 import '../../providers/providers.dart';
+import '../../utils/account_utils.dart';
 import '../../utils/photo_utils.dart';
 
 List<Widget> appbarActions({required BuildContext context, required int fragmentIndex, required WidgetRef ref, required bool selectingItems}) {
@@ -79,24 +82,55 @@ List<Widget> appbarActions({required BuildContext context, required int fragment
     Visibility(
       visible: (fragmentIndex == FragmentIndex.photos || fragmentIndex == FragmentIndex.albums) && !App.isDesktop() && !App.isWideScreen(context),
       child: IconButton(
-          onPressed: () {
+          onPressed: () async {
             if (fragmentIndex == FragmentIndex.photos) {
               createPhotos(ref);
             } else if (fragmentIndex == FragmentIndex.albums) {
-              final filename = FilenameUtils.generatedFileName(".album", appStorage.albumsPath);
-              final album = Album.fromFilename(filename);
-              showDialog(context: context, builder: (context) => EditAlbumDialog(
-                album: album,
-              ));
+              final id = await generatedAlbumId();
+              final album = Album(id: id);
+              if(context.mounted) {
+                showDialog(context: context, builder: (context) =>
+                    EditAlbumDialog(
+                      album: album,
+                    ));
+              }
             }
           },
           icon: const Icon(Icons.add)),
     ),
     Visibility(
       visible: fragmentIndex == FragmentIndex.settings,
-      child: AccountButton(onLoggedIn: () {
-        appStorage.refreshDataWithServer(ref);
-      }),
+      child:    AccountButton(onLoggedIn: ({required id, required token, required username}) {
+  onLoggedIn(id: id,
+  token: token,
+  username: username,
+  context: context,
+  ref: ref);
+  },
+  iconSize: 30,
+  profileIconSize: 15,
+  wideScreenIconSize: 25,
+  wideScreenProfileIconSize: 15,
+  appWebChannel: appWebChannel,
+  appStorage: appStorage,
+  appCacheData: appCacheData,
+  onUserRemoved: () {
+  onUserRemoved(ref);
+  },
+  onUserAdded: () {
+  onUserAdded(ref);
+  },
+  onUsernameChanged: () {
+  onUsernameChanged(ref);
+  },
+  onSelectedUserChanged: (user) {
+  onSelectedUserChanged(user, ref);
+  },
+  setAndroidNavigationBarColor: () {
+  appMethodChannel.setNavigationBarColor(Theme
+      .of(context)
+      .scaffoldBackgroundColor);
+  }),
     ),
     Visibility(
       visible: fragmentIndex != FragmentIndex.settings,
@@ -127,8 +161,7 @@ List<Widget> photoSelectionActions({required BuildContext context, required Widg
           final selectedPhotos = ref.watch(selectedItemsProvider);
           if(selectedPhotos != null) {
             for(var id in selectedPhotos) {
-              // appWebChannel.downloadPhotoFile(photo: ref.watch(photosProvider).photos.get(id), ref: ref);
-              print(ref.watch(photosProvider).photos.get(id).photoPath);
+              appWebChannel.downloadPhotoFile(photo: ref.watch(photosProvider).photos.get(id), ref: ref);
             }
           }
         }),

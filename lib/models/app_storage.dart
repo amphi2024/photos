@@ -1,9 +1,8 @@
-import 'dart:io';
-
 import 'package:amphi/models/app_storage_core.dart';
 import 'package:amphi/models/update_event.dart';
 import 'package:amphi/utils/path_utils.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:photos/models/photo.dart';
 import 'package:photos/providers/photos_provider.dart';
 
 import '../channels/app_web_channel.dart';
@@ -53,9 +52,8 @@ class AppStorage extends AppStorageCore {
 
     switch (updateEvent.action) {
       case UpdateEvent.uploadPhoto:
-        final photo = ref.read(photosProvider).photos.get(value);
         await appWebChannel.downloadPhotoInfo(id: value, onSuccess: (data) {
-          photo.data = data;
+          final photo = Photo.fromMap(data);
           photo.save(upload: false);
           if(photo.deleted != null) {
             ref.read(photosProvider.notifier).movePhotosToTrash([photo.id]);

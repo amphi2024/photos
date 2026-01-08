@@ -54,7 +54,7 @@ class AppWebChannel extends AppWebChannelCore {
   
   Future<void> uploadPhotoInfo({required Photo photo}) async {
     final updateEvent = UpdateEvent(action: UpdateEvent.uploadPhoto, value: photo.id);
-    await postJson(url: "$serverAddress/photos/${photo.id}/info", jsonBody: jsonEncode(photo.data), updateEvent: updateEvent);
+    await postJson(url: "$serverAddress/photos/${photo.id}/info", jsonBody: jsonEncode(photo.toJsonBody()), updateEvent: updateEvent);
   }
 
   Future<void> uploadPhoto({required Photo photo, void Function()? onSuccess, void Function(int?)? onFailed, required WidgetRef ref}) async {
@@ -118,7 +118,7 @@ class AppWebChannel extends AppWebChannelCore {
   
   Future<void> uploadAlbum({required Album album}) async {
     final updateEvent = UpdateEvent(action: UpdateEvent.uploadAlbum, value: album.id);
-    await postJson(url: "$serverAddress/photos/albums/${album.id}", jsonBody: jsonEncode(album.data), updateEvent: updateEvent);
+    await postJson(url: "$serverAddress/photos/albums/${album.id}", jsonBody: jsonEncode(album.toJsonBody()), updateEvent: updateEvent);
   }
 
   Future<void> deleteAlbum({required Album album}) async {
@@ -128,8 +128,7 @@ class AppWebChannel extends AppWebChannelCore {
 
   Future<void> downloadAlbum({required String id, required void Function(Album) onSuccess}) async {
     await downloadJson(url: "$serverAddress/photos/albums/$id", onSuccess: (data) async {
-      final album = Album.fromFilename("$id.album");
-      album.data = data;
+      final album = Album.fromMap(data);
       await album.save(upload: false);
       onSuccess(album);
     });
