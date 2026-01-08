@@ -3,9 +3,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:media_kit/media_kit.dart';
 import 'package:media_kit_video/media_kit_video.dart';
+import 'package:photos/channels/app_web_channel.dart';
 import 'package:photos/models/photo.dart';
-
-import 'controls/video_controls.dart';
 
 class VideoPlayer extends ConsumerStatefulWidget {
 
@@ -39,6 +38,9 @@ class _VideoPlayerState extends ConsumerState<VideoPlayer> {
     videoController = VideoController(player);
     player.open(Media(widget.photo.photoPath), play: false);
     player.stream.error.listen((event) {
+      // player.open(Media("${appWebChannel.serverAddress}/photos/${widget.photo.id}", httpHeaders: {
+      //   "Authorization": appWebChannel.token
+      // }), play: false);
       setState(() {
         errorCaused = true;
       });
@@ -69,8 +71,7 @@ class _VideoPlayerState extends ConsumerState<VideoPlayer> {
 
     return Video(
       height: width / (16 / 9),
-      controller: videoController,
-      controls: videoControls,
+      controller: videoController
     );
   }
 }
