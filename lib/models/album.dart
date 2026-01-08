@@ -45,7 +45,7 @@ class Album {
       id = await generatedAlbumId();
     }
     final database = await databaseHelper.database;
-    await database.insert("photos", toSqlInsertMap(), conflictAlgorithm: ConflictAlgorithm.replace);
+    await database.insert("albums", toSqlInsertMap(), conflictAlgorithm: ConflictAlgorithm.replace);
       if(upload && appSettings.useOwnServer) {
         await appWebChannel.uploadAlbum(album: this);
       }

@@ -34,9 +34,11 @@ class Photo {
       : created = created ?? DateTime.now(),
         modified = modified ?? DateTime.now(),
         date = date ?? DateTime.now() {
-    final fileType = mimeType.split("/").last;
-    photoPath = PathUtils.join(appStorage.libraryPath, id[0], id[1], id, "photo.$fileType");
-    thumbnailPath = PathUtils.join(appStorage.libraryPath, id[0], id[1], id, "thumbnail.jpg");
+    // if(id.length > 5) {
+      final fileType = mimeType.split("/").last;
+      photoPath = PathUtils.join(appStorage.libraryPath, id[0], id[1], id, "photo.$fileType");
+      thumbnailPath = PathUtils.join(appStorage.libraryPath, id[0], id[1], id, "thumbnail.jpg");
+   // }
   }
 
   Photo.fromMap(Map<String, dynamic> data)
@@ -113,9 +115,12 @@ class Photo {
   Future<void> save({bool upload = true, WidgetRef? ref}) async {
     if (id.isEmpty) {
       id = await generatedPhotoId();
+      // final fileType = mimeType.split("/").last;
+      // photoPath = PathUtils.join(appStorage.libraryPath, id[0], id[1], id, "photo.$fileType");
+      // thumbnailPath = PathUtils.join(appStorage.libraryPath, id[0], id[1], id, "thumbnail.jpg");
     }
     final database = await databaseHelper.database;
-    await database.insert("songs", toSqlInsertMap(), conflictAlgorithm: ConflictAlgorithm.replace);
+    await database.insert("photos", toSqlInsertMap(), conflictAlgorithm: ConflictAlgorithm.replace);
     if (upload) {
       if(upload && appSettings.useOwnServer) {
         await appWebChannel.uploadPhotoInfo(photo: this);
