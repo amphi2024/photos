@@ -70,6 +70,11 @@ class AppWebChannel extends AppWebChannelCore {
   }
 
   Future<void> downloadPhotoFile({required Photo photo, void Function()? onSuccess, void Function(int?)? onFailed, required WidgetRef ref}) async {
+    final file = File(photo.photoPath);
+    final parent = file.parent;
+    if(!await parent.exists()) {
+      await parent.create(recursive: true);
+    }
     await downloadFile(url: "$serverAddress/photos/${photo.id}", filePath: photo.photoPath, onSuccess: () {
       ref.read(transfersProvider.notifier).removeItem(photo.id);
       onSuccess?.call();
@@ -89,6 +94,10 @@ class AppWebChannel extends AppWebChannelCore {
       );
       if (response.statusCode == 200) {
         File file = File(photo.thumbnailPath);
+        final parent = file.parent;
+        if(!await parent.exists()) {
+          await parent.create(recursive: true);
+        }
         await file.writeAsBytes(response.bodyBytes, flush: true);
         if (onSuccess != null) {
           onSuccess();
