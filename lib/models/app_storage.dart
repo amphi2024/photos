@@ -83,71 +83,55 @@ class AppStorage extends AppStorageCore {
   }
 
   Future<void> refreshDataWithServer(WidgetRef ref) async {
-    await appWebChannel.getItems(url: "${appWebChannel.serverAddress}/photos", onSuccess: (idList) async {
+    await appWebChannel.getStrings(url: "${appWebChannel.serverAddress}/photos", onSuccess: (idList) async {
 
-      for(var id in ref.read(photosProvider).idList) {
-        final photo = ref.read(photosProvider).photos.get(id);
-        await appWebChannel.uploadPhotoInfo(photo: photo);
-        await appWebChannel.uploadPhoto(photo: photo, ref: ref);
-        // final infoFile = File(PathUtils.join(photo.path, "info.json"));
-        // if(!infoFile.existsSync()) {
-        //   await appWebChannel.downloadPhotoInfo(id: id, onSuccess: (data) async {
-        //     photo.data = data;
-        //     photo.getPhotoPath();
-        //     await appWebChannel.downloadPhotoThumbnail(photo: photo);
-        //     await photo.save(upload: false);
-        //     //await appWebChannel.downloadPhotoFile(photo: photo, ref: ref);
-        //     ref.read(photosProvider.notifier).insertPhoto(photo);
-        //   });
-        // }
-        // await appWebChannel.getSha256FromPhoto(id: id, onSuccess: (sha256) async {
-        //   if(photo.sha256 != sha256) {
-        //     await appWebChannel.uploadPhoto(photo: photo, ref: ref);
-        //   }
-        // }, onFailed: (code) async {
-        //   await appWebChannel.uploadPhoto(photo: photo, ref: ref);
-        // });
+      for(var id in idList) {
+        if(!ref.read(photosProvider).photos.containsKey(id)) {
+          appWebChannel.downloadPhotoInfo(id: id, onSuccess: (data) async {
+            final photo = Photo.fromMap(data);
+            photo.save(upload: false);
+            await appWebChannel.downloadPhotoThumbnail(photo: photo);
+            ref.read(photosProvider.notifier).insertPhoto(photo);
+          });
+        }
       }
 
-      // for(var id in idList) {
-      //   final photo = ref.read(photosProvider).photos.get(id);
-      //   final valid = await photo.verifySha256();
-      //   if(!valid) {
-      //     await appWebChannel.downloadPhotoInfo(id: id, onSuccess: (data) async {
-      //       photo.data = data;
-      //       photo.getPhotoPath();
-      //       await appWebChannel.downloadPhotoThumbnail(photo: photo);
-      //       await photo.save(upload: false);
-      //       //await appWebChannel.downloadPhotoFile(photo: photo, ref: ref);
-      //       ref.read(photosProvider.notifier).insertPhoto(photo);
-      //     });
-      //   }
-      // }
+      ref.read(photosProvider).photos.forEach((id, photo) async {
+        if(!idList.contains(id)) {
+          await appWebChannel.uploadPhotoInfo(photo: photo);
+          await appWebChannel.uploadPhoto(photo: photo, ref: ref);
+        }
+        else {
+          await appWebChannel.getSha256FromPhoto(id: id, onSuccess: (sha256) async {
+            if(photo.sha256 != sha256) {
+              await appWebChannel.uploadPhoto(photo: photo, ref: ref);
+            }
+          }, onFailed: (code) async {
+            await appWebChannel.uploadPhoto(photo: photo, ref: ref);
+          });
+        }
+      });
 
     });
 
-    await appWebChannel.getItems(url: "${appWebChannel.serverAddress}/photos/albums", onSuccess: (ids) async {
+    await appWebChannel.getStrings(url: "${appWebChannel.serverAddress}/photos/albums", onSuccess: (ids) async {
+      for(var id in ref.read(albumsProvider).idList) {
+        if(!ids.contains(id)) {
+          final album = ref.read(albumsProvider).albums[id];
+          if(album != null) {
+            await appWebChannel.uploadAlbum(album: album);
+          }
+        }
+      }
 
-      // for(var id in ref.read(albumsProvider).idList) {
-      //   if(!ids.contains(id)) {
-      //     final album = ref.read(albumsProvider).albums[id];
-      //     if(album != null) {
-      //       await appWebChannel.uploadAlbum(album: album);
-      //     }
-      //   }
-      // }
-      //
-      // for(var id in ids) {
-      //   if(!ref.read(albumsProvider).idList.contains(id)) {
-      //     await appWebChannel.downloadAlbum(id: id, onSuccess: (album) {
-      //       ref.read(albumsProvider.notifier).insertAlbum(album);
-      //     });
-      //   }
-      //
-      // }
-
+      for(var id in ids) {
+        if(!ref.read(albumsProvider).idList.contains(id)) {
+          await appWebChannel.downloadAlbum(id: id, onSuccess: (album) {
+            ref.read(albumsProvider.notifier).insertAlbum(album);
+          });
+        }
+      }
     });
-
   }
 
 }
