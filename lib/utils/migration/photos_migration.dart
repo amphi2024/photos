@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:amphi/utils/path_utils.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:sqflite_common_ffi/sqflite_ffi.dart';
 
 import '../../models/app_storage.dart';
@@ -36,7 +37,23 @@ Future<void> migratePhotos(Database db) async {
 
   await batch.commit();
 
-  await directory.rename(PathUtils.join(appStorage.selectedUser.storagePath, "library"));
+  final libraryDirectory = Directory(PathUtils.join(appStorage.selectedUser.storagePath, "library"));
+  if(await libraryDirectory.exists()) {
+    try {
+      for (var subDirectory in directory.listSync()) {
+        if (subDirectory is Directory) {
+          final directoryName = PathUtils.basename(subDirectory.path);
+          await subDirectory.rename(PathUtils.join(appStorage.selectedUser.storagePath, "library", directoryName));
+        }
+      }
+    }
+    catch(e) {
+      debugPrint(e.toString());
+    }
+  }
+  else {
+    await directory.rename(PathUtils.join(appStorage.selectedUser.storagePath, "library"));
+  }
 }
 
 Map<String, dynamic> _parsedLegacyPhoto(String id, Map<String, dynamic> map) {
