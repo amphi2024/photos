@@ -15,7 +15,6 @@ class AppStorage extends AppStorageCore {
   static final AppStorage _instance = AppStorage._internal();
   AppStorage._internal();
 
-  late String themesPath;
   late String libraryPath;
   late String albumsPath;
 
@@ -26,12 +25,10 @@ class AppStorage extends AppStorageCore {
   @override
   void initPaths() {
     super.initPaths();
-    themesPath = PathUtils.join(selectedUser.storagePath, "themes");
 
     libraryPath = PathUtils.join(selectedUser.storagePath, "library");
     albumsPath = PathUtils.join(selectedUser.storagePath, "albums");
 
-    createDirectoryIfNotExists(themesPath);
     createDirectoryIfNotExists(libraryPath);
     createDirectoryIfNotExists(albumsPath);
   }
