@@ -37,6 +37,12 @@ class AppSettings {
   set serverAddress(value) => data["serverAddress"] = value;
   String get serverAddress => data.putIfAbsent("serverAddress", () => "");
 
+  set autoCheckUpdate(bool value) => data["autoCheckUpdate"] = value;
+  bool get autoCheckUpdate => data["autoCheckUpdate"] ?? Platform.isWindows || Platform.isMacOS;
+
+  set autoCheckServerUpdate(bool value) => data["autoCheckServerUpdate"] = value;
+  bool get autoCheckServerUpdate => data["autoCheckServerUpdate"] ?? true;
+
   Future<void> getData() async {
     try {
       var file = File(appStorage.settingsPath);

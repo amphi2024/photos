@@ -11,22 +11,38 @@ import 'package:photos/views/albums_view.dart';
 import 'package:photos/views/photos_view.dart';
 import 'package:photos/models/app_state.dart';
 
+import '../utils/update_check.dart';
 import '../views/settings_view.dart';
 import 'app_bar/app_bar_actions.dart';
 
-class MainPage extends ConsumerWidget {
+class MainPage extends ConsumerStatefulWidget {
   const MainPage({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    appMethodChannel.setNavigationBarColor(Theme.of(context).scaffoldBackgroundColor);
+  MainPageState createState() => MainPageState();
+}
+
+class MainPageState extends ConsumerState<MainPage> {
+
+  @override
+  void initState() {
+    super.initState();
+    checkForAppUpdate(context);
+    checkForServerUpdate(context);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    appMethodChannel.setNavigationBarColor(Theme
+        .of(context)
+        .scaffoldBackgroundColor);
     final fragmentIndex = ref.watch(fragmentIndexProvider);
     final selectingItems = ref.watch(selectedItemsProvider) != null;
 
     return PopScope(
       canPop: !selectingItems,
       onPopInvokedWithResult: (didPop, result) {
-        if(selectingItems) {
+        if (selectingItems) {
           ref.read(selectedItemsProvider.notifier).endSelection();
         }
       },
@@ -36,10 +52,10 @@ class MainPage extends ConsumerWidget {
           centerTitle: false,
           automaticallyImplyLeading: false,
           actions: appbarActions(
-            fragmentIndex: fragmentIndex,
-            context: context,
-            ref: ref,
-            selectingItems: selectingItems
+              fragmentIndex: fragmentIndex,
+              context: context,
+              ref: ref,
+              selectingItems: selectingItems
           ),
         ),
         body: Stack(
@@ -48,20 +64,24 @@ class MainPage extends ConsumerWidget {
                 child: PageView(
                   onPageChanged: (index) {
                     final previousIndex = ref.watch(fragmentIndexProvider);
-                    if(previousIndex == FragmentIndex.settings) {
+                    if (previousIndex == FragmentIndex.settings) {
                       appSettings.save();
                     }
                     ref.read(fragmentIndexProvider.notifier).set(index);
 
-                    if(ref.read(selectedItemsProvider) != null) {
+                    if (ref.read(selectedItemsProvider) != null) {
                       ref.read(selectedItemsProvider.notifier).endSelection();
                     }
                   },
                   controller: appState.pageController,
                   children: [
-                    PhotosView(photos: ref.watch(photosProvider).idList, placeholder: AppLocalizations.of(context).get("@no_photos")),
+                    PhotosView(photos: ref
+                        .watch(photosProvider)
+                        .idList, placeholder: AppLocalizations.of(context).get("@no_photos")),
                     const AlbumsView(),
-                    PhotosView(photos: ref.watch(photosProvider).trash, itemClickEnabled: false, placeholder: AppLocalizations.of(context).get("@no_photos_trash")),
+                    PhotosView(photos: ref
+                        .watch(photosProvider)
+                        .trash, itemClickEnabled: false, placeholder: AppLocalizations.of(context).get("@no_photos_trash")),
                     const SettingsView(),
                   ],)
             ),

@@ -80,5 +80,13 @@
 
   "@video_error": "Failed to load video",
   "@upload_failed": "Upload failed",
-  "@download_failed": "Download failed"
+  "@download_failed": "Download failed",
+
+  "automatically_check_updates": "Automatically check for updates",
+  "update_alert_title": "Update Available",
+  "update_alert_text": "A new version is available. Update now?",
+  "update_now": "Go to download",
+  "update_later": "I will do it manually",
+  "automatically_check_server_updates": "Automatically check for server updates",
+  "server_update_message": "New server version available. Update recommended."
 }

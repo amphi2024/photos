@@ -5,6 +5,7 @@
 list(APPEND FLUTTER_PLUGIN_LIST
   bitsdojo_window_linux
   desktop_drop
+  flutter_platform_alert
   handy_window
   media_kit_libs_linux
   media_kit_video

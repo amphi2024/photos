@@ -42,6 +42,16 @@ class _SettingsViewState extends ConsumerState<SettingsView> with FragmentViewMi
             visible: appSettings.useOwnServer,
             child: const ServerSettingComponent()),
         Visibility(
+            visible: appSettings.useOwnServer,
+            child: TitledCheckBox(
+                title: AppLocalizations.of(context).get("automatically_check_server_updates"),
+                value: appSettings.autoCheckServerUpdate,
+                onChanged: (value) {
+                  setState(() {
+                    appSettings.autoCheckServerUpdate = value;
+                  });
+                })),
+        Visibility(
             visible: Platform.isAndroid &&
                 appMethodChannel.systemVersion >= 29,
             child: TitledCheckBox(
@@ -52,6 +62,14 @@ class _SettingsViewState extends ConsumerState<SettingsView> with FragmentViewMi
                     appSettings.transparentNavigationBar = value!;
                   });
                 })),
+        TitledCheckBox(
+            title: AppLocalizations.of(context).get("automatically_check_updates"),
+            value: appSettings.autoCheckUpdate,
+            onChanged: (value) {
+              setState(() {
+                appSettings.autoCheckUpdate = value;
+              });
+            }),
       ],
     );
   }
