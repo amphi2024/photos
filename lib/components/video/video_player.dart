@@ -75,6 +75,7 @@ class _VideoPlayerState extends ConsumerState<VideoPlayer> {
 
     return Video(
       height: width / (16 / 9),
+      fill: Colors.transparent,
       controller: videoController
     );
   }

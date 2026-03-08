@@ -88,5 +88,8 @@
   "update_now": "Go to download",
   "update_later": "I will do it manually",
   "automatically_check_server_updates": "Automatically check for server updates",
-  "server_update_message": "New server version available. Update recommended."
+  "server_update_message": "New server version available. Update recommended.",
+
+  "make_available_offline": "Make available offline",
+  "make_only_only": "Make online only"
 }

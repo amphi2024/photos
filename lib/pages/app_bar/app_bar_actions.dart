@@ -1,13 +1,9 @@
-import 'dart:io';
-
-import 'package:amphi/models/app.dart';
 import 'package:amphi/models/app_localizations.dart';
 import 'package:amphi/widgets/account/account_button.dart';
 import 'package:amphi/widgets/dialogs/confirmation_dialog.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:photos/components/photo_info.dart';
-import 'package:photos/components/transfers_button.dart';
 import 'package:photos/dialogs/edit_photo_info_dialog.dart';
 import 'package:photos/pages/app_bar/app_bar_popup_menu.dart';
 import 'package:photos/providers/current_photo_id_provider.dart';
@@ -25,62 +21,74 @@ import '../../providers/albums_provider.dart';
 import '../../providers/photos_provider.dart';
 import '../../providers/providers.dart';
 import '../../utils/account_utils.dart';
+import '../../utils/delete_photos.dart';
+import '../../utils/handle_offline_access.dart';
 import '../../utils/photo_utils.dart';
+import '../../utils/remove_photos_from_album.dart';
+import '../../utils/screen_size.dart';
 
-List<Widget> appbarActions({required BuildContext context, required int fragmentIndex, required WidgetRef ref, required bool selectingItems}) {
-  if (selectingItems) {
+List<Widget> appbarActions({required BuildContext context, required int fragmentIndex, required WidgetRef ref, required List<String>? selectedItems}) {
+  if (selectedItems != null) {
     if (fragmentIndex == FragmentIndex.photos) {
-      return photoSelectionActions(context: context, ref: ref);
-    }
-    else if (fragmentIndex == FragmentIndex.albums) {
+      return photoSelectionActions(context: context, ref: ref, selectedItems: selectedItems);
+    } else if (fragmentIndex == FragmentIndex.albums) {
       return albumSelectionActions(context: context, ref: ref);
-    }
-    else if(fragmentIndex == FragmentIndex.album) {
-      return photoSelectionActions(context: context, ref: ref, albumId: ref.read(currentAlbumIdProvider));
-    }
-    else {
+    } else if (fragmentIndex == FragmentIndex.album) {
+      return photoSelectionActions(context: context, ref: ref, albumId: ref.read(currentAlbumIdProvider), selectedItems: selectedItems);
+    } else {
       return trashSelectionActions(context: context, ref: ref);
     }
   }
   final currentPhotoId = ref.watch(currentPhotoIdProvider);
 
-  if(currentPhotoId.isNotEmpty && (App.isWideScreen(context) || App.isDesktop())) {
+  if (currentPhotoId.isNotEmpty && (isDesktopOrTablet(context))) {
     final photo = ref.watch(photosProvider).photos.get(currentPhotoId);
     return [
       PopupMenuButton(
           icon: const Icon(Icons.more_horiz),
           itemBuilder: (context) {
             return [
-              PopupMenuItem(child: Text(AppLocalizations.of(context).get("@share_photo")), onTap: () {
-                sharePhoto(photo);
-              }),
-              PopupMenuItem(child: Text(AppLocalizations.of(context).get("@photo_details")), onTap: () {
-                showDialog(context: context, builder: (context) {
-                  return Dialog(
-                    child: SizedBox(
-                      width: 350,
-                      height: 400,
-                      child: PhotoInfo(id: currentPhotoId),
-                    ),
-                  );
-                });
-              }),
-              PopupMenuItem(child: Text(AppLocalizations.of(context).get("@export_photo")), onTap: () {
-                exportPhoto(photo);
-              }),
-              PopupMenuItem(child: Text(AppLocalizations.of(context).get("@edit_photo_info")), onTap: () {
-                showDialog(context: context, builder: (context) {
-                  return EditPhotoInfoDialog(photo: photo);
-                });
-              })
+              PopupMenuItem(
+                  child: Text(AppLocalizations.of(context).get("@share_photo")),
+                  onTap: () {
+                    sharePhoto(photo);
+                  }),
+              PopupMenuItem(
+                  child: Text(AppLocalizations.of(context).get("@photo_details")),
+                  onTap: () {
+                    showDialog(
+                        context: context,
+                        builder: (context) {
+                          return Dialog(
+                            child: SizedBox(
+                              width: 350,
+                              height: 400,
+                              child: PhotoInfo(id: currentPhotoId),
+                            ),
+                          );
+                        });
+                  }),
+              PopupMenuItem(
+                  child: Text(AppLocalizations.of(context).get("@export_photo")),
+                  onTap: () {
+                    exportPhoto(photo);
+                  }),
+              PopupMenuItem(
+                  child: Text(AppLocalizations.of(context).get("@edit_photo_info")),
+                  onTap: () {
+                    showDialog(
+                        context: context,
+                        builder: (context) {
+                          return EditPhotoInfoDialog(photo: photo);
+                        });
+                  })
             ];
           })
     ];
   }
   return [
-    if(!App.isDesktop() && !App.isWideScreen(context)) const TransfersButton(),
     Visibility(
-      visible: (fragmentIndex == FragmentIndex.photos || fragmentIndex == FragmentIndex.albums) && !App.isDesktop() && !App.isWideScreen(context),
+      visible: (fragmentIndex == FragmentIndex.photos || fragmentIndex == FragmentIndex.albums) && isMobile(context),
       child: IconButton(
           onPressed: () async {
             if (fragmentIndex == FragmentIndex.photos) {
@@ -88,11 +96,12 @@ List<Widget> appbarActions({required BuildContext context, required int fragment
             } else if (fragmentIndex == FragmentIndex.albums) {
               final id = await generatedAlbumId();
               final album = Album(id: id);
-              if(context.mounted) {
-                showDialog(context: context, builder: (context) =>
-                    EditAlbumDialog(
-                      album: album,
-                    ));
+              if (context.mounted) {
+                showDialog(
+                    context: context,
+                    builder: (context) => EditAlbumDialog(
+                          album: album,
+                        ));
               }
             }
           },
@@ -100,50 +109,45 @@ List<Widget> appbarActions({required BuildContext context, required int fragment
     ),
     Visibility(
       visible: fragmentIndex == FragmentIndex.settings,
-      child:    AccountButton(onLoggedIn: ({required id, required token, required username}) {
-  onLoggedIn(id: id,
-  token: token,
-  username: username,
-  context: context,
-  ref: ref);
-  },
-  iconSize: 30,
-  profileIconSize: 15,
-  wideScreenIconSize: 25,
-  wideScreenProfileIconSize: 15,
-  appWebChannel: appWebChannel,
-  appStorage: appStorage,
-  appCacheData: appCacheData,
-  onUserRemoved: () {
-  onUserRemoved(ref);
-  },
-  onUserAdded: () {
-  onUserAdded(ref);
-  },
-  onUsernameChanged: () {
-  onUsernameChanged(ref);
-  },
-  onSelectedUserChanged: (user) {
-  onSelectedUserChanged(user, ref);
-  },
-  setAndroidNavigationBarColor: () {
-  appMethodChannel.setNavigationBarColor(Theme
-      .of(context)
-      .scaffoldBackgroundColor);
-  }),
+      child: AccountButton(
+          onLoggedIn: ({required id, required token, required username}) {
+            onLoggedIn(id: id, token: token, username: username, context: context, ref: ref);
+          },
+          iconSize: 30,
+          profileIconSize: 15,
+          wideScreenIconSize: 25,
+          wideScreenProfileIconSize: 15,
+          appWebChannel: appWebChannel,
+          appStorage: appStorage,
+          appCacheData: appCacheData,
+          onUserRemoved: () {
+            onUserRemoved(ref);
+          },
+          onUserAdded: () {
+            onUserAdded(ref);
+          },
+          onUsernameChanged: () {
+            onUsernameChanged(ref);
+          },
+          onSelectedUserChanged: (user) {
+            onSelectedUserChanged(user, ref);
+          },
+          setAndroidNavigationBarColor: () {
+            appMethodChannel.setNavigationBarColor(Theme.of(context).scaffoldBackgroundColor);
+          }),
     ),
     Visibility(
       visible: fragmentIndex != FragmentIndex.settings,
       child: PopupMenuButton(
           icon: const Icon(Icons.more_horiz),
           itemBuilder: (context) {
-           return mainPageAppBarPopupMenuItems(ref: ref, fragmentIndex: fragmentIndex, context: context);
+            return mainPageAppBarPopupMenuItems(ref: ref, fragmentIndex: fragmentIndex, context: context);
           }),
     ),
   ];
 }
 
-List<Widget> photoSelectionActions({required BuildContext context, required WidgetRef ref, String? albumId}) {
+List<Widget> photoSelectionActions({required BuildContext context, required WidgetRef ref, String? albumId, required List<String>? selectedItems}) {
   return [
     IconButton(
         onPressed: () {
@@ -157,61 +161,42 @@ List<Widget> photoSelectionActions({required BuildContext context, required Widg
         icon: const Icon(Icons.add)),
     PopupMenuButton(itemBuilder: (context) {
       return [
-        PopupMenuItem(child: Text("Download"), onTap: () {
-          final selectedPhotos = ref.watch(selectedItemsProvider);
-          if(selectedPhotos != null) {
-            for(var id in selectedPhotos) {
-              appWebChannel.downloadPhotoFile(photo: ref.watch(photosProvider).photos.get(id), ref: ref);
-            }
-          }
-        }),
-        PopupMenuItem(child: Text("Remove Download"), onTap: () {
-          final selectedPhotos = ref.watch(selectedItemsProvider);
-          if(selectedPhotos != null) {
-            for(var id in selectedPhotos) {
-              var file = File(ref.watch(photosProvider).photos.get(id).photoPath);
-              file.delete();
-            }
-          }
-        }),
+        PopupMenuItem(
+            child: Text(AppLocalizations.of(context).get("make_available_offline")),
+            onTap: () {
+              makePhotosAvailableOffline(ref);
+            }),
+        PopupMenuItem(
+            child: Text(AppLocalizations.of(context).get("remove_offline_copy")),
+            onTap: () {
+              if(selectedItems != null) {
+                makePhotosOnlineOnly(ref: ref, selectedItems: selectedItems);
+              }
+            }),
       ];
     }),
     Visibility(
         visible: albumId != null,
         child: IconButton(
-        onPressed: () {
-          final selectedItems = ref.read(selectedItemsProvider);
-          if(albumId == null || selectedItems == null) {
-            return;
-          }
-          showDialog(context: context, builder: (context) {
-            return ConfirmationDialog(title: AppLocalizations.of(context).get("@dialog_title_remove_photos_from_album"), onConfirmed: () {
-              final album = ref.read(albumsProvider).albums.get(albumId);
-              album.photos.removeWhere((element) => selectedItems.contains(element));
-              album.save();
-              ref.read(albumsProvider.notifier).insertAlbum(album);
-            });
-          });
-
-        },
-        icon: const Icon(Icons.remove))),
+            onPressed: () {
+              final selectedItems = ref.read(selectedItemsProvider);
+              if (albumId == null || selectedItems == null) {
+                return;
+              }
+              showDialog(
+                  context: context,
+                  builder: (context) {
+                    return ConfirmationDialog(
+                        title: AppLocalizations.of(context).get("@dialog_title_remove_photos_from_album"),
+                        onConfirmed: () {
+                          removePhotosFromAlbum(ref: ref, selectedItems: selectedItems, albumId: albumId);
+                        });
+                  });
+            },
+            icon: const Icon(Icons.remove))),
     IconButton(
         onPressed: () {
-          showDialog(
-              context: context,
-              builder: (context) {
-                return ConfirmationDialog(
-                    title: AppLocalizations.of(context).get("@dialog_title_move_to_trash_photo"),
-                    onConfirmed: () {
-                      var list = ref.read(selectedItemsProvider)!;
-                      for (var id in list) {
-                        var photo = ref.read(photosProvider).photos.get(id);
-                        photo.deleted = DateTime.now();
-                        photo.save();
-                      }
-                      ref.read(photosProvider.notifier).movePhotosToTrash(list);
-                    });
-              });
+          moveSelectedPhotosToTrash(ref: ref, context: context);
         },
         icon: const Icon(Icons.delete))
   ];
@@ -254,36 +239,13 @@ List<Widget> trashSelectionActions({required BuildContext context, required Widg
         icon: const Icon(Icons.check_circle_outline)),
     IconButton(
         onPressed: () {
-          showDialog(
-              context: context,
-              builder: (context) => ConfirmationDialog(
-                  title: AppLocalizations.of(context).get("@dialog_title_restore_selected_photos"),
-                  onConfirmed: () {
-                    var list = ref.read(selectedItemsProvider)!;
-                    for (var id in list) {
-                      var photo = ref.read(photosProvider).photos.get(id);
-                      photo.deleted = null;
-                      photo.save();
-                    }
-                    ref.read(photosProvider.notifier).restorePhotos(list);
-                  }));
+          restoreSelectedPhotos(context: context, ref: ref);
         },
         icon: const Icon(Icons.restore)),
-    IconButton(onPressed: () {
-      showDialog(
-          context: context,
-          builder: (context) {
-            return ConfirmationDialog(
-                title: AppLocalizations.of(context).get("@dialog_title_delete_selected_photos"),
-                onConfirmed: () {
-                  var list = ref.read(selectedItemsProvider)!;
-                  for (var id in list) {
-                    var photo = ref.read(photosProvider).photos.get(id);
-                    photo.delete();
-                  }
-                  ref.read(photosProvider.notifier).deletePhotos(list);
-                });
-          });
-    }, icon: const Icon(Icons.delete))
+    IconButton(
+        onPressed: () {
+          deleteSelectedPhotosPermanently(context: context, ref: ref);
+        },
+        icon: const Icon(Icons.delete))
   ];
 }

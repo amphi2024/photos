@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:photos/dialogs/edit_album_dialog.dart';
 import 'package:photos/providers/albums_provider.dart';
+import 'package:photos/utils/screen_size.dart';
 
 import '../../models/app_cache.dart';
 import '../../models/fragment_index.dart';
@@ -146,6 +147,7 @@ PopupMenuItem _popupMenuItem(
     required String id,
     required void Function() sort}) {
   return PopupMenuItem(
+    height: isDesktop() ? 30 : kMinInteractiveDimension,
     child: Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [

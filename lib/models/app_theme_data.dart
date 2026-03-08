@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:amphi/models/app.dart';
 
+import '../utils/screen_size.dart';
 import 'app_theme.dart';
 
 class AppThemeData {
@@ -54,7 +54,7 @@ class AppThemeData {
                   fontSize: 20,
                   fontWeight: FontWeight.bold))),
       dialogBackgroundColor: backgroundColor,
-      dividerColor: inactiveColor,
+      dividerColor: const Color.fromARGB(60, 153, 153, 153),
       popupMenuTheme: PopupMenuThemeData(
         surfaceTintColor: backgroundColor,
         color: backgroundColor,
@@ -62,15 +62,33 @@ class AppThemeData {
          borderRadius: BorderRadius.circular(10)
        )
       ),
+      sliderTheme: SliderThemeData(
+        padding: EdgeInsets.all(5),
+        mouseCursor: WidgetStateProperty.all(MouseCursor.defer),
+        trackHeight: 3,
+        inactiveTrackColor: Colors.red,
+        trackShape: RectangularSliderTrackShape(),
+        overlayShape: RoundSliderOverlayShape(
+          overlayRadius: 10
+        ),
+        thumbShape: RoundSliderThumbShape(
+          enabledThumbRadius: 6,
+          disabledThumbRadius: 6,
+        ),
+      ),
       iconButtonTheme: IconButtonThemeData(
           style: ButtonStyle(
-              surfaceTintColor: WidgetStateProperty.all(backgroundColor))),
+            surfaceTintColor: WidgetStateProperty.all(backgroundColor),
+            mouseCursor: WidgetStateProperty.all(MouseCursor.defer),
+          )),
       shadowColor:
           backgroundColor.green + backgroundColor.blue + backgroundColor.red >
                   381
               ? Colors.grey.withOpacity(0.5)
               : Colors.black.withOpacity(0.5),
-      iconTheme: IconThemeData(color: accentColor, size: App.isWideScreen(context) || App.isDesktop() ? 25 : 15),
+      iconTheme: IconThemeData(
+          color: isDesktopOrTablet(context) ? textColor.soften(brightness) : accentColor,
+          size: isDesktopOrTablet(context) ? 20 : 15),
       checkboxTheme: CheckboxThemeData(
         checkColor: WidgetStateProperty.resolveWith((states) {
           if (states.contains(WidgetState.selected)) {
@@ -100,7 +118,7 @@ class AppThemeData {
           iconTheme: IconThemeData(color: accentColor, size: 20)),
       disabledColor: inactiveColor,
       highlightColor: accentColor,
-      scaffoldBackgroundColor: backgroundColor,
+      scaffoldBackgroundColor: isDesktop() ? noteBackgroundColor : backgroundColor,
       cardColor: noteBackgroundColor,
       snackBarTheme: SnackBarThemeData(
         backgroundColor: floatingButtonBackground,
@@ -141,5 +159,18 @@ class AppThemeData {
       navigationDrawerTheme: NavigationDrawerThemeData(
           backgroundColor: menuBackground),
     );
+  }
+}
+
+const softenValue = 60;
+
+extension SoftenExtension on Color {
+  Color soften(Brightness brightness) {
+    if(brightness == Brightness.light) {
+      return Color.fromARGB((a * 255).round() & 0xff, ((r * 255).round() & 0xff) + softenValue, ((g * 255).round() & 0xff) + softenValue, ((b * 255).round() & 0xff) + softenValue);
+    }
+    else {
+      return Color.fromARGB((a * 255).round() & 0xff, ((r * 255).round() & 0xff) - softenValue, ((g * 255).round() & 0xff) - softenValue, ((b * 255).round() & 0xff) - softenValue);
+    }
   }
 }

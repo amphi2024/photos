@@ -8,7 +8,7 @@ import 'package:photos/models/fragment_index.dart';
 import 'package:photos/providers/photos_provider.dart';
 import 'package:photos/providers/providers.dart';
 import 'package:photos/views/albums_view.dart';
-import 'package:photos/views/photos_view.dart';
+import 'package:photos/views/photos/photos_view.dart';
 import 'package:photos/models/app_state.dart';
 
 import '../utils/update_check.dart';
@@ -37,7 +37,8 @@ class MainPageState extends ConsumerState<MainPage> {
         .of(context)
         .scaffoldBackgroundColor);
     final fragmentIndex = ref.watch(fragmentIndexProvider);
-    final selectingItems = ref.watch(selectedItemsProvider) != null;
+    final selectedItems = ref.watch(selectedItemsProvider);
+    final selectingItems = selectedItems != null;
 
     return PopScope(
       canPop: !selectingItems,
@@ -55,7 +56,7 @@ class MainPageState extends ConsumerState<MainPage> {
               fragmentIndex: fragmentIndex,
               context: context,
               ref: ref,
-              selectingItems: selectingItems
+              selectedItems: selectedItems
           ),
         ),
         body: Stack(
@@ -81,7 +82,7 @@ class MainPageState extends ConsumerState<MainPage> {
                     const AlbumsView(),
                     PhotosView(photos: ref
                         .watch(photosProvider)
-                        .trash, itemClickEnabled: false, placeholder: AppLocalizations.of(context).get("@no_photos_trash")),
+                        .trash, placeholder: AppLocalizations.of(context).get("@no_photos_trash")),
                     const SettingsView(),
                   ],)
             ),

@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:photos/providers/albums_provider.dart';
 import 'package:photos/providers/photos_provider.dart';
-import 'package:photos/views/photos_view.dart';
+import 'package:photos/views/photos/photos_view.dart';
 
 import '../channels/app_method_channel.dart';
 import '../providers/providers.dart';
@@ -21,7 +21,8 @@ class AlbumPage extends ConsumerWidget {
     appMethodChannel.setNavigationBarColor(Theme
         .of(context)
         .scaffoldBackgroundColor);
-    final selectingPhotos = ref.watch(selectedItemsProvider) != null;
+    final selectedItems = ref.watch(selectedItemsProvider);
+    final selectingPhotos = selectedItems != null;
     final album = ref.watch(albumsProvider).albums.get(id);
     int axisCount = (MediaQuery
         .of(context)
@@ -53,7 +54,7 @@ class AlbumPage extends ConsumerWidget {
               visible: !selectingPhotos,
               child: Text(album.title)
           ),
-          actions: selectingPhotos ? photoSelectionActions(context: context, ref: ref, albumId: id) : [
+          actions: selectingPhotos ? photoSelectionActions(context: context, ref: ref, albumId: id, selectedItems: selectedItems) : [
             PopupMenuButton(itemBuilder: (context) {
               return albumPageAppBarPopupMenuItems(
                 id: id,

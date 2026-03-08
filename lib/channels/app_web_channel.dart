@@ -10,6 +10,7 @@ import 'package:photos/models/app_settings.dart';
 import 'package:photos/models/app_storage.dart';
 import 'package:photos/models/photo.dart';
 import 'package:photos/models/transfer.dart';
+import 'package:photos/providers/photos_provider.dart';
 import 'package:photos/providers/transfers_provider.dart';
 import 'package:web_socket_channel/io.dart';
 
@@ -77,6 +78,8 @@ class AppWebChannel extends AppWebChannelCore {
     }
     await downloadFile(url: "$serverAddress/photos/${photo.id}", filePath: photo.photoPath, onSuccess: () {
       ref.read(transfersProvider.notifier).removeItem(photo.id);
+      photo.availableOnOffline = true;
+      ref.read(photosProvider.notifier).insertPhoto(photo);
       onSuccess?.call();
     }, onFailed: (code) {
       ref.read(transfersProvider.notifier).insertItem(Transfer(id: photo.id, title: photo.title, received: 1, total: 1, error: true, upload: false));

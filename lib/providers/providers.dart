@@ -1,4 +1,5 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:photos/models/app_cache.dart';
 import 'package:photos/models/fragment_index.dart';
 
 class FragmentIndexNotifier extends Notifier<int> {
@@ -50,6 +51,9 @@ final currentAlbumIdProvider = NotifierProvider<CurrentAlbumIdNotifier, String>(
 
 class SelectedItemsNotifier extends Notifier<List<String>?> {
 
+  bool ctrlPressed = false;
+  bool shiftPressed = false;
+
   @override
   List<String>? build() {
     return null;
@@ -79,6 +83,25 @@ class SelectedItemsNotifier extends Notifier<List<String>?> {
     state = null;
   }
 
+  void addAll(List<String> items) {
+    final list = [...state!];
+    list.addAll(items);
+    state = list;
+  }
+
 }
 
 final selectedItemsProvider = NotifierProvider<SelectedItemsNotifier, List<String>?>(SelectedItemsNotifier.new);
+
+class AxisCountNotifier extends Notifier<int> {
+  @override
+  int build() {
+    return appCacheData.axisCount;
+  }
+
+  void set(int value) {
+    state = value;
+  }
+}
+
+final axisCountProvider = NotifierProvider<AxisCountNotifier, int>(AxisCountNotifier.new);

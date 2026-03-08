@@ -29,6 +29,7 @@ class Photo {
   String mimeType = "";
   String sha256 = "";
   String? note;
+  bool availableOnOffline = true;
 
   Photo({required this.id, this.title = "", DateTime? created, DateTime? modified, DateTime? date, this.deleted})
       : created = created ?? DateTime.now(),
@@ -54,6 +55,7 @@ class Photo {
     final fileType = mimeType.split("/").last;
     photoPath = PathUtils.join(appStorage.libraryPath, id[0], id[1], id, "photo.$fileType");
     thumbnailPath = PathUtils.join(appStorage.libraryPath, id[0], id[1], id, "thumbnail.jpg");
+    availableOnOffline = File(photoPath).existsSync();
   }
 
   static Future<Photo> createdPhoto(String originalPath, WidgetRef ref) async {
@@ -90,6 +92,10 @@ class Photo {
     appWebChannel.uploadPhoto(photo: photo, ref: ref);
     photo.generateThumbnail();
     return photo;
+  }
+
+  Future<void> removeDownload() async {
+
   }
 
   Future<bool> verifySha256() async {

@@ -5,7 +5,7 @@ import 'package:bitsdojo_window/src/icons/icons.dart';
 import 'package:bitsdojo_window/src/app_window.dart';
 import 'dart:io' show Platform;
 
-import 'package:photos/pages/wide_main_page.dart';
+import 'package:photos/pages/desktop_main_page.dart';
 
 typedef CustomWindowButtonIconBuilder = Widget Function(
     CustomWindowButtonContext buttonContext);

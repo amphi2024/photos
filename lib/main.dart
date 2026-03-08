@@ -1,6 +1,5 @@
 import 'dart:io';
 
-import 'package:amphi/models/app.dart';
 import 'package:amphi/models/app_localizations.dart';
 import 'package:bitsdojo_window/bitsdojo_window.dart';
 import 'package:flutter/material.dart';
@@ -10,9 +9,10 @@ import 'package:media_kit/media_kit.dart';
 import 'package:photos/channels/app_method_channel.dart';
 import 'package:photos/models/app_settings.dart';
 import 'package:photos/models/app_storage.dart';
-import 'package:photos/pages/wide_main_page.dart';
+import 'package:photos/pages/desktop_main_page.dart';
 import 'package:photos/providers/albums_provider.dart';
 import 'package:photos/providers/photos_provider.dart';
+import 'package:photos/utils/screen_size.dart';
 import 'package:sqflite_common_ffi/sqflite_ffi.dart';
 import 'channels/app_web_channel.dart';
 import 'models/app_cache.dart';
@@ -43,7 +43,7 @@ void main() async {
         ],
         child: MyApp(key: mainScreenKey)));
 
-    if (App.isDesktop()) {
+    if (isDesktop()) {
       doWhenWindowReady(() {
         appWindow.minSize = const Size(550, 300);
         appWindow.size =
@@ -116,7 +116,7 @@ class _MyAppState extends ConsumerState<MyApp> with WidgetsBindingObserver {
         GlobalCupertinoLocalizations.delegate,
       ],
       supportedLocales: AppLocalizations.supportedLocales,
-      home: App.isWideScreen(context) || App.isDesktop() ? const WideMainPage() : const MainPage(),
+      home: isDesktopOrTablet(context) ? const DesktopMainPage() : const MainPage(),
     );
   }
 }

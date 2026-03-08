@@ -1,9 +1,9 @@
 import 'dart:io';
 
-import 'package:amphi/models/app.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:photos/providers/photos_provider.dart';
+import 'package:photos/utils/screen_size.dart';
 
 import 'video/video_player.dart';
 
@@ -11,29 +11,27 @@ class PhotoWidget extends ConsumerWidget {
   final BoxFit? fit;
   final String id;
   final bool thumbnail;
-  const PhotoWidget({super.key, required this.id, this.fit, this.thumbnail = false});
+  final Widget? thumbnailFallback;
+  const PhotoWidget({super.key, required this.id, this.fit, this.thumbnail = false, this.thumbnailFallback});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final photo = ref.watch(photosProvider).photos.get(id);
 
-    if(thumbnail) {
-      if(photo.mimeType == "image/webp" || photo.mimeType == "image/gif" || !photo.isImage()) {
+    if(thumbnail && (photo.mimeType == "image/webp" || photo.mimeType == "image/gif" || !photo.isImage())) {
         return Image.file(
           File(photo.thumbnailPath),
           fit: fit,
           errorBuilder: (context, error, stackTrace) {
-            photo.deleteThumbnail();
-            return Column(
+            return thumbnailFallback ?? Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Icon(Icons.photo, size: App.isWideScreen(context) ? 80 : 40),
+                Icon(Icons.photo, size: isDesktopOrTablet(context) ? 80 : 40),
                 Text(photo.mimeType.split("/").last.toUpperCase())
               ],
             );
           },
         );
-      }
     }
 
     if(photo.isImage()) {
@@ -45,7 +43,7 @@ class PhotoWidget extends ConsumerWidget {
           return Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Icon(Icons.photo, size: App.isWideScreen(context) ? 80 : 40),
+              Icon(Icons.photo, size: isDesktopOrTablet(context) ? 80 : 40),
               Text(photo.mimeType.split("/").last.toUpperCase())
             ],
           );
