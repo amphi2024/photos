@@ -18,7 +18,7 @@ class AppThemeData {
   Color menuBackground;
 
   AppThemeData({
-    this.backgroundColor = ThemeModel.midnight,
+    this.backgroundColor = ThemeModel.charCoal,
     this.textColor = ThemeModel.white,
     this.accentColor = ThemeModel.cherryBlossom,
     this.inactiveColor = ThemeModel.inactiveGray,
@@ -118,7 +118,7 @@ class AppThemeData {
           iconTheme: IconThemeData(color: accentColor, size: 20)),
       disabledColor: inactiveColor,
       highlightColor: accentColor,
-      scaffoldBackgroundColor: isDesktop() ? noteBackgroundColor : backgroundColor,
+      scaffoldBackgroundColor: backgroundColor,
       cardColor: noteBackgroundColor,
       snackBarTheme: SnackBarThemeData(
         backgroundColor: floatingButtonBackground,

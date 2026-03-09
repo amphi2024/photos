@@ -6,7 +6,7 @@ class LightTheme extends AppThemeData {
 
   LightTheme(
       {
-        super.backgroundColor = ThemeModel.lightGray,
+        super.backgroundColor = ThemeModel.white,
         super.textColor = ThemeModel.midnight,
         super.accentColor = ThemeModel.cherryBlossom,
         super.inactiveColor = ThemeModel.inactiveGray,
