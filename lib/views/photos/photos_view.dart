@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:photos/models/app_cache.dart';
 import 'package:photos/providers/current_photo_id_provider.dart';
 import 'package:photos/providers/providers.dart';
 import 'package:photos/utils/photo_item_press_callback.dart';
@@ -52,6 +53,10 @@ class _PhotosViewState extends ConsumerState<PhotosView> with FragmentViewMixin 
           ref.read(axisCountProvider.notifier).set(axisCount - 1);
           return;
         }
+      },
+      onScaleEnd: (d) {
+        appCacheData.axisCount = axisCount;
+        appCacheData.save();
       },
       child: RefreshIndicator(
         onRefresh: refresh,
