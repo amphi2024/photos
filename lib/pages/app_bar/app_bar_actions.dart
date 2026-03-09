@@ -3,10 +3,7 @@ import 'package:amphi/widgets/account/account_button.dart';
 import 'package:amphi/widgets/dialogs/confirmation_dialog.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:photos/components/photo_info.dart';
-import 'package:photos/dialogs/edit_photo_info_dialog.dart';
 import 'package:photos/pages/app_bar/app_bar_popup_menu.dart';
-import 'package:photos/providers/current_photo_id_provider.dart';
 import 'package:photos/utils/generated_id.dart';
 
 import '../../channels/app_method_channel.dart';
@@ -18,7 +15,6 @@ import '../../models/app_cache.dart';
 import '../../models/app_storage.dart';
 import '../../models/fragment_index.dart';
 import '../../providers/albums_provider.dart';
-import '../../providers/photos_provider.dart';
 import '../../providers/providers.dart';
 import '../../utils/account_utils.dart';
 import '../../utils/delete_photos.dart';
@@ -39,55 +35,9 @@ List<Widget> appbarActions({required BuildContext context, required int fragment
       return trashSelectionActions(context: context, ref: ref);
     }
   }
-  final currentPhotoId = ref.watch(currentPhotoIdProvider);
 
-  if (currentPhotoId.isNotEmpty && (isDesktopOrTablet(context))) {
-    final photo = ref.watch(photosProvider).photos.get(currentPhotoId);
-    return [
-      PopupMenuButton(
-          icon: const Icon(Icons.more_horiz),
-          itemBuilder: (context) {
-            return [
-              PopupMenuItem(
-                  child: Text(AppLocalizations.of(context).get("@share_photo")),
-                  onTap: () {
-                    sharePhoto(photo);
-                  }),
-              PopupMenuItem(
-                  child: Text(AppLocalizations.of(context).get("@photo_details")),
-                  onTap: () {
-                    showDialog(
-                        context: context,
-                        builder: (context) {
-                          return Dialog(
-                            child: SizedBox(
-                              width: 350,
-                              height: 400,
-                              child: PhotoInfo(id: currentPhotoId),
-                            ),
-                          );
-                        });
-                  }),
-              PopupMenuItem(
-                  child: Text(AppLocalizations.of(context).get("@export_photo")),
-                  onTap: () {
-                    exportPhoto(photo);
-                  }),
-              PopupMenuItem(
-                  child: Text(AppLocalizations.of(context).get("@edit_photo_info")),
-                  onTap: () {
-                    showDialog(
-                        context: context,
-                        builder: (context) {
-                          return EditPhotoInfoDialog(photo: photo);
-                        });
-                  })
-            ];
-          })
-    ];
-  }
   return [
-    Visibility(
+  Visibility(
       visible: (fragmentIndex == FragmentIndex.photos || fragmentIndex == FragmentIndex.albums) && isMobile(context),
       child: IconButton(
           onPressed: () async {
@@ -100,13 +50,41 @@ List<Widget> appbarActions({required BuildContext context, required int fragment
                 showDialog(
                     context: context,
                     builder: (context) => EditAlbumDialog(
-                          album: album,
-                        ));
+                      album: album,
+                    ));
               }
             }
           },
-          icon: const Icon(Icons.add)),
-    ),
+          icon: const Icon(Icons.add))),
+    // PopupMenuButton(
+    //     tooltip: "",
+    //     itemBuilder: (context) {
+    //       return [
+    //         PopupMenuItem(
+    //           height: 30,
+    //           onTap: () {
+    //             createPhotos(ref);
+    //           },
+    //           child: Text(AppLocalizations.of(context).get("@new_photo")),
+    //         ),
+    //         PopupMenuItem(
+    //           height: 30,
+    //           onTap: () async {
+    //             final id = await generatedAlbumId();
+    //             final album = Album(id: id);
+    //             if (context.mounted) {
+    //               showDialog(
+    //                   context: context,
+    //                   builder: (context) => EditAlbumDialog(
+    //                     album: album,
+    //                   ));
+    //             }
+    //           },
+    //           child: Text(AppLocalizations.of(context).get("@new_album")),
+    //         ),
+    //       ];
+    //     },
+    //     icon: const Icon(Icons.add_circle_outline)),
     Visibility(
       visible: fragmentIndex == FragmentIndex.settings,
       child: AccountButton(
