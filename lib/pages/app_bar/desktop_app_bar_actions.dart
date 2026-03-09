@@ -142,7 +142,7 @@ List<Widget> desktopAppbarActions({required Photo currentPhoto, required WidgetR
       width: 100,
       child: Slider(
           min: 1,
-          max: 15,
+          max: maximumAxisCountDouble,
           value: 16 - axisCount.toDouble(),
           onChanged: (value) {
             ref.read(axisCountProvider.notifier).set(15 - value.toInt());

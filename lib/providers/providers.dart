@@ -93,6 +93,9 @@ class SelectedItemsNotifier extends Notifier<List<String>?> {
 
 final selectedItemsProvider = NotifierProvider<SelectedItemsNotifier, List<String>?>(SelectedItemsNotifier.new);
 
+const maximumAxisCount = 15;
+const maximumAxisCountDouble = 15.0;
+
 class AxisCountNotifier extends Notifier<int> {
   @override
   int build() {
