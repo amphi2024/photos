@@ -21,7 +21,6 @@ import '../../utils/delete_photos.dart';
 import '../../utils/handle_offline_access.dart';
 import '../../utils/photo_utils.dart';
 import '../../utils/remove_photos_from_album.dart';
-import '../../utils/screen_size.dart';
 
 List<Widget> appbarActions({required BuildContext context, required int fragmentIndex, required WidgetRef ref, required List<String>? selectedItems}) {
   if (selectedItems != null) {
@@ -37,54 +36,35 @@ List<Widget> appbarActions({required BuildContext context, required int fragment
   }
 
   return [
-  Visibility(
-      visible: (fragmentIndex == FragmentIndex.photos || fragmentIndex == FragmentIndex.albums) && isMobile(context),
-      child: IconButton(
-          onPressed: () async {
-            if (fragmentIndex == FragmentIndex.photos) {
-              createPhotos(ref);
-            } else if (fragmentIndex == FragmentIndex.albums) {
-              final id = await generatedAlbumId();
-              final album = Album(id: id);
-              if (context.mounted) {
-                showDialog(
-                    context: context,
-                    builder: (context) => EditAlbumDialog(
-                      album: album,
-                    ));
-              }
-            }
-          },
-          icon: const Icon(Icons.add))),
-    // PopupMenuButton(
-    //     tooltip: "",
-    //     itemBuilder: (context) {
-    //       return [
-    //         PopupMenuItem(
-    //           height: 30,
-    //           onTap: () {
-    //             createPhotos(ref);
-    //           },
-    //           child: Text(AppLocalizations.of(context).get("@new_photo")),
-    //         ),
-    //         PopupMenuItem(
-    //           height: 30,
-    //           onTap: () async {
-    //             final id = await generatedAlbumId();
-    //             final album = Album(id: id);
-    //             if (context.mounted) {
-    //               showDialog(
-    //                   context: context,
-    //                   builder: (context) => EditAlbumDialog(
-    //                     album: album,
-    //                   ));
-    //             }
-    //           },
-    //           child: Text(AppLocalizations.of(context).get("@new_album")),
-    //         ),
-    //       ];
-    //     },
-    //     icon: const Icon(Icons.add_circle_outline)),
+    PopupMenuButton(
+        tooltip: "",
+        itemBuilder: (context) {
+          return [
+            PopupMenuItem(
+              height: 30,
+              onTap: () {
+                createPhotos(ref);
+              },
+              child: Text(AppLocalizations.of(context).get("@new_photo")),
+            ),
+            PopupMenuItem(
+              height: 30,
+              onTap: () async {
+                final id = await generatedAlbumId();
+                final album = Album(id: id);
+                if (context.mounted) {
+                  showDialog(
+                      context: context,
+                      builder: (context) => EditAlbumDialog(
+                        album: album,
+                      ));
+                }
+              },
+              child: Text(AppLocalizations.of(context).get("@new_album")),
+            ),
+          ];
+        },
+        icon: const Icon(Icons.add_circle_outline)),
     Visibility(
       visible: fragmentIndex == FragmentIndex.settings,
       child: AccountButton(
