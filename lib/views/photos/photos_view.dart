@@ -41,28 +41,41 @@ class _PhotosViewState extends ConsumerState<PhotosView> with FragmentViewMixin 
     final currentPhotoId = ref.watch(currentPhotoIdProvider);
     final selectedItems = ref.watch(selectedItemsProvider);
 
-    return RefreshIndicator(
-      onRefresh: refresh,
-      child: GridView.builder(
-          physics: const AlwaysScrollableScrollPhysics(),
-          controller: scrollController,
-          itemCount: photoIdList.length,
-          padding: EdgeInsets.only(top: 3, left: 3, right: 3, bottom: MediaQuery.of(context).padding.bottom + navMenuHeight),
-          gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount: axisCount, mainAxisSpacing: 3, crossAxisSpacing: 3),
-          itemBuilder: (context, index) {
-            final id = photoIdList[index];
-            return GestureDetector(
-              onLongPress: () async {
-                if(Platform.isAndroid || Platform.isIOS) {
-                  ref.read(selectedItemsProvider.notifier).startSelection();
-                }
-              },
-              onTap: () {
-                onPhotoPressed(ref: ref, currentPhotoId: currentPhotoId, photoId: id, context: context, selectedItems: selectedItems);
-              },
-              child: PhotosViewGridItem(id: id),
-            );
-          }),
+    return GestureDetector(
+      onScaleUpdate: (d) {
+        if (d.scale < 0.8 && axisCount < maximumAxisCount) {
+          ref.read(axisCountProvider.notifier).set(axisCount + 1);
+          return;
+        }
+
+        if (d.scale > 1.2 && axisCount > 1) {
+          ref.read(axisCountProvider.notifier).set(axisCount - 1);
+          return;
+        }
+      },
+      child: RefreshIndicator(
+        onRefresh: refresh,
+        child: GridView.builder(
+            physics: const AlwaysScrollableScrollPhysics(),
+            controller: scrollController,
+            itemCount: photoIdList.length,
+            padding: EdgeInsets.only(top: 3, left: 3, right: 3, bottom: MediaQuery.of(context).padding.bottom + navMenuHeight),
+            gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount: axisCount, mainAxisSpacing: 3, crossAxisSpacing: 3),
+            itemBuilder: (context, index) {
+              final id = photoIdList[index];
+              return GestureDetector(
+                onLongPress: () async {
+                  if(Platform.isAndroid || Platform.isIOS) {
+                    ref.read(selectedItemsProvider.notifier).startSelection();
+                  }
+                },
+                onTap: () {
+                  onPhotoPressed(ref: ref, currentPhotoId: currentPhotoId, photoId: id, context: context, selectedItems: selectedItems);
+                },
+                child: PhotosViewGridItem(id: id),
+              );
+            }),
+      ),
     );
   }
 }
