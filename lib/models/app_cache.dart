@@ -24,12 +24,18 @@ class AppCacheData extends AppCacheDataCore {
         return option;
       }
       else {
-        return SortOption.created;
+        if(id == "!PHOTOS") {
+          return SortOption.dateDescending;
+        }
+        return SortOption.title;
       }
     }
     else {
       data["sortOption"] = <String, dynamic>{};
-      return SortOption.created;
+      if(id == "!PHOTOS") {
+        return SortOption.dateDescending;
+      }
+      return SortOption.title;
     }
   }
 
