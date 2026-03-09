@@ -10,6 +10,7 @@ import 'package:photos/channels/app_method_channel.dart';
 import 'package:photos/models/app_settings.dart';
 import 'package:photos/models/app_storage.dart';
 import 'package:photos/pages/desktop_main_page.dart';
+import 'package:photos/pages/tablet_main_page.dart';
 import 'package:photos/providers/albums_provider.dart';
 import 'package:photos/providers/photos_provider.dart';
 import 'package:photos/utils/screen_size.dart';
@@ -116,7 +117,7 @@ class _MyAppState extends ConsumerState<MyApp> with WidgetsBindingObserver {
         GlobalCupertinoLocalizations.delegate,
       ],
       supportedLocales: AppLocalizations.supportedLocales,
-      home: isDesktopOrTablet(context) ? const DesktopMainPage() : const MainPage(),
+      home: isDesktop() ? const DesktopMainPage() : isWideScreen(context) ? const TabletMainPage() : const MainPage(),
     );
   }
 }
