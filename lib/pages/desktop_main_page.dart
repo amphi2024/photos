@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:photos/channels/app_method_channel.dart';
 import 'package:photos/components/desktop_nav_menu.dart';
 import 'package:photos/models/fragment_index.dart';
 import 'package:photos/pages/app_bar/desktop_app_bar_actions.dart';
@@ -45,7 +44,6 @@ class DesktopMainPageState extends ConsumerState<DesktopMainPage> {
 
   @override
   Widget build(BuildContext context) {
-    appMethodChannel.setNavigationBarColor(Theme.of(context).scaffoldBackgroundColor);
     final selectedItems = ref.watch(selectedItemsProvider);
     final fragmentIndex = ref.watch(fragmentIndexProvider);
     final currentPhotoId = ref.watch(currentPhotoIdProvider);
