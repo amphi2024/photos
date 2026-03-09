@@ -63,15 +63,15 @@ class AppThemeData {
        )
       ),
       sliderTheme: SliderThemeData(
-        padding: EdgeInsets.all(5),
+        padding: const EdgeInsets.all(5),
         mouseCursor: WidgetStateProperty.all(MouseCursor.defer),
         trackHeight: 3,
         inactiveTrackColor: Colors.red,
-        trackShape: RectangularSliderTrackShape(),
-        overlayShape: RoundSliderOverlayShape(
+        trackShape: const RectangularSliderTrackShape(),
+        overlayShape: const RoundSliderOverlayShape(
           overlayRadius: 10
         ),
-        thumbShape: RoundSliderThumbShape(
+        thumbShape: const RoundSliderThumbShape(
           enabledThumbRadius: 6,
           disabledThumbRadius: 6,
         ),
