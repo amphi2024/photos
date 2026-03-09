@@ -13,6 +13,9 @@ class AppCacheData extends AppCacheDataCore {
   int get axisCount => data["axisCount"] ?? 4;
   set axisCount(int value) => data["axisCount"] = value;
 
+  double get sidebarWidth => data["sidebarWidth"] ?? 200;
+  set sidebarWidth(double value) => data["sidebarWidth"] = value;
+
   String sortOption(String id) {
     var dirName = PathUtils.basename(appStorage.selectedUser.storagePath);
     if(data["sortOption"]?[dirName] is Map) {

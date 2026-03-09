@@ -48,6 +48,7 @@ class DesktopMainPageState extends ConsumerState<DesktopMainPage> {
     final fragmentIndex = ref.watch(fragmentIndexProvider);
     final currentPhotoId = ref.watch(currentPhotoIdProvider);
     final currentAlbumId = ref.watch(currentAlbumIdProvider);
+    final sidebarWidth = ref.watch(sidebarWidthProvider);
 
     final axisCount = ref.watch(axisCountProvider);
     final currentPhoto = ref.watch(photosProvider).photos.get(currentPhotoId);
@@ -73,7 +74,7 @@ class DesktopMainPageState extends ConsumerState<DesktopMainPage> {
         children: [
           const Positioned(left: 0, top: 0, bottom: 0, child: DesktopNavMenu()),
           Positioned(
-              left: 200,
+              left: sidebarWidth,
               top: MediaQuery.of(context).padding.top,
               right: 0,
               bottom: 0,

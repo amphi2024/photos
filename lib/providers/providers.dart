@@ -108,3 +108,19 @@ class AxisCountNotifier extends Notifier<int> {
 }
 
 final axisCountProvider = NotifierProvider<AxisCountNotifier, int>(AxisCountNotifier.new);
+
+class SidebarWidthNotifier extends Notifier<double> {
+  @override
+  double build() {
+    return 200;
+  }
+
+  void set(double value) {
+    if(value <= 50 || value >= 500) {
+      return;
+    }
+    state = value;
+  }
+}
+
+final sidebarWidthProvider = NotifierProvider<SidebarWidthNotifier, double>(SidebarWidthNotifier.new);
