@@ -31,185 +31,182 @@ class DesktopNavMenu extends ConsumerWidget {
     return Container(
         width: 200,
         color: Theme.of(context).navigationDrawerTheme.backgroundColor,
-        child: Padding(
-          padding: EdgeInsets.only(top: MediaQuery.of(context).padding.top),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.start,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Row(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.start,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                Expanded(child: Builder(builder: (context) {
+                  if (isDesktop()) {
+                    return SizedBox(height: 50, child: MoveWindow());
+                  } else {
+                    return const SizedBox(height: 50);
+                  }
+                })),
+                AccountButton(
+                    onLoggedIn: ({required id, required token, required username}) {
+                      onLoggedIn(id: id, token: token, username: username, context: context, ref: ref);
+                    },
+                    iconSize: 30,
+                    profileIconSize: 15,
+                    wideScreenIconSize: 25,
+                    wideScreenProfileIconSize: 15,
+                    appWebChannel: appWebChannel,
+                    appStorage: appStorage,
+                    appCacheData: appCacheData,
+                    onUserRemoved: () {
+                      onUserRemoved(ref);
+                    },
+                    onUserAdded: () {
+                      onUserAdded(ref);
+                    },
+                    onUsernameChanged: () {
+                      onUsernameChanged(ref);
+                    },
+                    onSelectedUserChanged: (user) {
+                      onSelectedUserChanged(user, ref);
+                    },
+                    setAndroidNavigationBarColor: () {
+                      appMethodChannel.setNavigationBarColor(Theme.of(context).scaffoldBackgroundColor);
+                    })
+              ],
+            ),
+            Expanded(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.start,
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Expanded(child: Builder(builder: (context) {
-                    if (isDesktop()) {
-                      return SizedBox(height: 50, child: MoveWindow());
-                    } else {
-                      return const SizedBox(height: 50);
-                    }
-                  })),
-                  AccountButton(
-                      onLoggedIn: ({required id, required token, required username}) {
-                        onLoggedIn(id: id, token: token, username: username, context: context, ref: ref);
-                      },
-                      iconSize: 30,
-                      profileIconSize: 15,
-                      wideScreenIconSize: 25,
-                      wideScreenProfileIconSize: 15,
-                      appWebChannel: appWebChannel,
-                      appStorage: appStorage,
-                      appCacheData: appCacheData,
-                      onUserRemoved: () {
-                        onUserRemoved(ref);
-                      },
-                      onUserAdded: () {
-                        onUserAdded(ref);
-                      },
-                      onUsernameChanged: () {
-                        onUsernameChanged(ref);
-                      },
-                      onSelectedUserChanged: (user) {
-                        onSelectedUserChanged(user, ref);
-                      },
-                      setAndroidNavigationBarColor: () {
-                        appMethodChannel.setNavigationBarColor(Theme.of(context).scaffoldBackgroundColor);
-                      })
-                ],
-              ),
-              Expanded(
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.start,
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    _MenuText(text: AppLocalizations.of(context).get("@photos")),
-                    DragTarget<List<String>>(onAcceptWithDetails: (details) {
-                      if (fragmentIndex == FragmentIndex.trash) {
-                        for (final id in details.data) {
-                          final photo = ref.read(photosProvider).photos.get(id);
-                          photo.deleted = null;
-                          photo.save();
-                        }
-                        ref.read(photosProvider.notifier).restorePhotos(details.data);
-                      }
-                    }, builder: (context, candidateData, rejectedData) {
-                      return _MenuItem(
-                          icon: const Icon(
-                            Icons.photo_library_outlined,
-                            size: 16,
-                          ),
-                          title: AppLocalizations.of(context).get("@library"),
-                          focused: fragmentIndex == FragmentIndex.photos,
-                          onPressed: () {
-                            ref.read(fragmentIndexProvider.notifier).set(0);
-                          });
-                    }),
-                    DragTarget<List<String>>(onAcceptWithDetails: (details) {
+                  _MenuText(text: AppLocalizations.of(context).get("@photos")),
+                  DragTarget<List<String>>(onAcceptWithDetails: (details) {
+                    if (fragmentIndex == FragmentIndex.trash) {
                       for (final id in details.data) {
                         final photo = ref.read(photosProvider).photos.get(id);
-                        photo.deleted = DateTime.now();
+                        photo.deleted = null;
                         photo.save();
                       }
-                      ref.read(photosProvider.notifier).movePhotosToTrash(details.data);
-                    }, builder: (context, candidateData, rejectedData) {
-                      return _MenuItem(
-                          icon: const Icon(
-                            Icons.delete,
-                            size: 16,
-                          ),
-                          title: AppLocalizations.of(context).get("@trash"),
-                          focused: fragmentIndex == FragmentIndex.trash,
-                          onPressed: () {
-                            ref.read(fragmentIndexProvider.notifier).set(2);
-                          });
-                    }),
-                    Row(
-                      children: [
-                        Expanded(child: _MenuText(text: AppLocalizations.of(context).get("@albums"))),
-                        PopupMenuButton(
-                          padding: EdgeInsets.zero,
-                          itemBuilder: (context) {
-                            return albumsPopupMenuItems(ref: ref, context: context);
-                          },
-                          icon: const Icon(Icons.more_horiz),
-                          iconSize: 14,
-                        )
-                      ],
-                    ),
-                    Expanded(
-                        child: ListView.builder(
-                            itemCount: ref.read(albumsProvider).idList.length,
-                            itemBuilder: (context, index) {
-                              final album = albumsState.getAlbum(index);
-                              final firstPhotoId = album.photos.firstOrNull;
-                              return DragTarget<List<String>>(onAcceptWithDetails: (details) {
-                                album.photos.addAll(details.data);
-                                album.photos = album.photos.toSet().toList();
-                                album.photos.sortPhotos(appCacheData.sortOption(album.id), ref.read(photosProvider).photos);
-                                album.save();
-                                ref.read(albumsProvider.notifier).insertAlbum(album);
-                              }, builder: (context, candidateData, rejectedData) {
-                                return _MenuItem(
-                                    icon: firstPhotoId != null
-                                        ? SizedBox(
-                                            width: 20,
-                                            height: 20,
-                                            child: PhotoWidget(id: firstPhotoId, thumbnail: true, thumbnailFallback: const Icon(
-                                              Icons.photo_album,
-                                              size: 16,
-                                            )),
-                                          )
-                                        : const Icon(
+                      ref.read(photosProvider.notifier).restorePhotos(details.data);
+                    }
+                  }, builder: (context, candidateData, rejectedData) {
+                    return _MenuItem(
+                        icon: const Icon(
+                          Icons.photo_library_outlined,
+                          size: 16,
+                        ),
+                        title: AppLocalizations.of(context).get("@library"),
+                        focused: fragmentIndex == FragmentIndex.photos,
+                        onPressed: () {
+                          ref.read(fragmentIndexProvider.notifier).set(0);
+                        });
+                  }),
+                  DragTarget<List<String>>(onAcceptWithDetails: (details) {
+                    for (final id in details.data) {
+                      final photo = ref.read(photosProvider).photos.get(id);
+                      photo.deleted = DateTime.now();
+                      photo.save();
+                    }
+                    ref.read(photosProvider.notifier).movePhotosToTrash(details.data);
+                  }, builder: (context, candidateData, rejectedData) {
+                    return _MenuItem(
+                        icon: const Icon(
+                          Icons.delete,
+                          size: 16,
+                        ),
+                        title: AppLocalizations.of(context).get("@trash"),
+                        focused: fragmentIndex == FragmentIndex.trash,
+                        onPressed: () {
+                          ref.read(fragmentIndexProvider.notifier).set(2);
+                        });
+                  }),
+                  Row(
+                    children: [
+                      Expanded(child: _MenuText(text: AppLocalizations.of(context).get("@albums"))),
+                      PopupMenuButton(
+                        padding: EdgeInsets.zero,
+                        itemBuilder: (context) {
+                          return albumsPopupMenuItems(ref: ref, context: context);
+                        },
+                        icon: const Icon(Icons.more_horiz),
+                        iconSize: 14,
+                      )
+                    ],
+                  ),
+                  Expanded(
+                      child: ListView.builder(
+                          itemCount: ref.read(albumsProvider).idList.length,
+                          itemBuilder: (context, index) {
+                            final album = albumsState.getAlbum(index);
+                            final firstPhotoId = album.photos.firstOrNull;
+                            return DragTarget<List<String>>(onAcceptWithDetails: (details) {
+                              album.photos.addAll(details.data);
+                              album.photos = album.photos.toSet().toList();
+                              album.photos.sortPhotos(appCacheData.sortOption(album.id), ref.read(photosProvider).photos);
+                              album.save();
+                              ref.read(albumsProvider.notifier).insertAlbum(album);
+                            }, builder: (context, candidateData, rejectedData) {
+                              return _MenuItem(
+                                  icon: firstPhotoId != null
+                                      ? SizedBox(
+                                          width: 20,
+                                          height: 20,
+                                          child: PhotoWidget(id: firstPhotoId, thumbnail: true, thumbnailFallback: const Icon(
                                             Icons.photo_album,
                                             size: 16,
-                                          ),
-                                    title: album.title,
-                                    focused: currentAlbumId == album.id && fragmentIndex == FragmentIndex.album,
-                                    onPressed: () {
-                                      ref.read(currentAlbumIdProvider.notifier).set(album.id);
-                                      if (ref.watch(fragmentIndexProvider) != FragmentIndex.album) {
-                                        ref.read(fragmentIndexProvider.notifier).set(FragmentIndex.album);
-                                      }
-                                    });
-                              });
-                            }))
-                  ],
-                ),
-              ),
-              Row(
-                children: [
-                  IconButton(
-                      onPressed: () {
-                        showDialog(
-                            context: context,
-                            builder: (context) => Dialog(
-                                  child: SizedBox(
-                                    width: 450,
-                                    height: 500,
-                                    child: Column(
-                                      children: [
-                                        Align(
-                                          alignment: Alignment.topRight,
-                                          child: IconButton(
-                                              onPressed: () {
-                                                appSettings.save();
-                                                Navigator.pop(context);
-                                              },
-                                              icon: const Icon(Icons.cancel_outlined)),
+                                          )),
+                                        )
+                                      : const Icon(
+                                          Icons.photo_album,
+                                          size: 16,
                                         ),
-                                        const Expanded(child: SettingsView()),
-                                      ],
-                                    ),
-                                  ),
-                                )).then((value) {
-                          appSettings.save();
-                        });
-                      },
-                      icon: const Icon(
-                        Icons.settings,
-                        size: 18,
-                      ))
+                                  title: album.title,
+                                  focused: currentAlbumId == album.id && fragmentIndex == FragmentIndex.album,
+                                  onPressed: () {
+                                    ref.read(currentAlbumIdProvider.notifier).set(album.id);
+                                    if (ref.watch(fragmentIndexProvider) != FragmentIndex.album) {
+                                      ref.read(fragmentIndexProvider.notifier).set(FragmentIndex.album);
+                                    }
+                                  });
+                            });
+                          }))
                 ],
-              )
-            ],
-          ),
+              ),
+            ),
+            Row(
+              children: [
+                IconButton(
+                    onPressed: () {
+                      showDialog(
+                          context: context,
+                          builder: (context) => Dialog(
+                                child: SizedBox(
+                                  width: 450,
+                                  height: 500,
+                                  child: Column(
+                                    children: [
+                                      Align(
+                                        alignment: Alignment.topRight,
+                                        child: IconButton(
+                                            onPressed: () {
+                                              appSettings.save();
+                                              Navigator.pop(context);
+                                            },
+                                            icon: const Icon(Icons.cancel_outlined)),
+                                      ),
+                                      const Expanded(child: SettingsView()),
+                                    ],
+                                  ),
+                                ),
+                              )).then((value) {
+                        appSettings.save();
+                      });
+                    },
+                    icon: const Icon(
+                      Icons.settings,
+                      size: 18,
+                    ))
+              ],
+            )
+          ],
         ));
   }
 }
