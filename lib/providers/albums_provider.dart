@@ -74,7 +74,10 @@ class AlbumsNotifier extends Notifier<AlbumsState> {
       idList.add(album.id);
     }
 
-    return AlbumsState(albums, idList);
+    final state = AlbumsState(albums, idList);
+    state.sortAlbums();
+
+    return state;
   }
 
   Future<void> rebuild() async {
