@@ -26,7 +26,7 @@ class PhotoInfo extends ConsumerWidget {
         Text(
           photo.date.toLocalizedString(),
           textAlign: TextAlign.center,
-          style: TextStyle(color: Theme.of(context).dividerColor),
+          style: TextStyle(color: Theme.of(context).disabledColor),
         ),
         Padding(
           padding: const EdgeInsets.only(top: 8),

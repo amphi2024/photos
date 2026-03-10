@@ -46,7 +46,7 @@ class LabeledIconButton extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final themeData = Theme.of(context);
-    final color = ref.watch(fragmentIndexProvider) == fragmentIndex ? themeData.highlightColor : themeData.dividerColor;
+    final color = ref.watch(fragmentIndexProvider) == fragmentIndex ? themeData.highlightColor : themeData.disabledColor;
     return Material(
       color: Colors.transparent,
       child: InkWell(
