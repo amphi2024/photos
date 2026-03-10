@@ -28,6 +28,7 @@ class DesktopNavMenu extends ConsumerWidget {
     final currentAlbumId = ref.watch(currentAlbumIdProvider);
     final albumsState = ref.watch(albumsProvider);
     final sidebarWidth = ref.watch(sidebarWidthProvider);
+    final photos = ref.watch(photosProvider).photos;
 
     return Container(
         width: sidebarWidth,
@@ -140,7 +141,7 @@ class DesktopNavMenu extends ConsumerWidget {
                                 itemCount: ref.read(albumsProvider).idList.length,
                                 itemBuilder: (context, index) {
                                   final album = albumsState.getAlbum(index);
-                                  final firstPhotoId = album.photos.firstOrNull;
+                                  final coverPhoto = album.getCoverPhoto(photos);
                                   return DragTarget<List<String>>(onAcceptWithDetails: (details) {
                                     album.photos.addAll(details.data);
                                     album.photos = album.photos.toSet().toList();
@@ -149,11 +150,11 @@ class DesktopNavMenu extends ConsumerWidget {
                                     ref.read(albumsProvider.notifier).insertAlbum(album);
                                   }, builder: (context, candidateData, rejectedData) {
                                     return _MenuItem(
-                                        icon: firstPhotoId != null
+                                        icon: coverPhoto != null
                                             ? SizedBox(
                                                 width: 20,
                                                 height: 20,
-                                                child: PhotoWidget(id: firstPhotoId, thumbnail: true, thumbnailFallback: const Icon(
+                                                child: PhotoWidget(photo: coverPhoto, thumbnail: true, thumbnailFallback: const Icon(
                                                   Icons.photo_album,
                                                   size: 16,
                                                 )),

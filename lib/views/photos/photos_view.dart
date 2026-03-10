@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:photos/models/app_cache.dart';
 import 'package:photos/providers/current_photo_id_provider.dart';
+import 'package:photos/providers/photos_provider.dart';
 import 'package:photos/providers/providers.dart';
 import 'package:photos/utils/photo_item_press_callback.dart';
 import 'package:photos/views/fragment_view_mixin.dart';
@@ -33,7 +34,7 @@ class _PhotosViewState extends ConsumerState<PhotosView> with FragmentViewMixin 
   @override
   Widget build(BuildContext context) {
     final photoIdList = widget.photos;
-    // final photos = ref.watch(photosProvider).photos;
+    final photos = ref.watch(photosProvider).photos;
     if (photoIdList.isEmpty) {
       return Center(child: Text(widget.placeholder));
     }
@@ -68,6 +69,7 @@ class _PhotosViewState extends ConsumerState<PhotosView> with FragmentViewMixin 
             gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount: axisCount, mainAxisSpacing: 3, crossAxisSpacing: 3),
             itemBuilder: (context, index) {
               final id = photoIdList[index];
+              final photo = photos.get(id);
               return GestureDetector(
                 onLongPress: () async {
                   if(Platform.isAndroid || Platform.isIOS) {
@@ -77,7 +79,7 @@ class _PhotosViewState extends ConsumerState<PhotosView> with FragmentViewMixin 
                 onTap: () {
                   onPhotoPressed(ref: ref, currentPhotoId: currentPhotoId, photoId: id, context: context, selectedItems: selectedItems);
                 },
-                child: PhotosViewGridItem(id: id),
+                child: PhotosViewGridItem(key: ValueKey(id), photo: photo),
               );
             }),
       ),

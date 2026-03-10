@@ -3,6 +3,7 @@ import 'package:amphi/widgets/account/account_button.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:photos/components/photo_widget.dart';
+import 'package:photos/providers/photos_provider.dart';
 
 import '../channels/app_method_channel.dart';
 import '../channels/app_web_channel.dart';
@@ -25,6 +26,7 @@ class TabletSidebar extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final fragmentIndex = ref.watch(fragmentIndexProvider);
     final currentAlbumId = ref.watch(currentAlbumIdProvider);
+    final photos = ref.watch(photosProvider).photos;
     final albumsState = ref.watch(albumsProvider);
     final albumIdList = albumsState.idList;
     final sidebarWidth = ref.watch(sidebarWidthProvider);
@@ -120,14 +122,14 @@ class TabletSidebar extends ConsumerWidget {
                                   itemCount: albumIdList.length,
                                   itemBuilder: (context, index) {
                                     final album = albumsState.getAlbum(index);
-                                    final firstPhotoId = album.photos.firstOrNull;
+                                    final coverPhoto = album.getCoverPhoto(photos);
                                     return _MenuItem(
-                                        icon: firstPhotoId != null
+                                        icon: coverPhoto != null
                                             ? SizedBox(
                                                 width: 20,
                                                 height: 20,
                                                 child: PhotoWidget(
-                                                    id: firstPhotoId,
+                                                    photo: coverPhoto,
                                                     thumbnail: true,
                                                     thumbnailFallback: const Icon(
                                                       Icons.photo_album,

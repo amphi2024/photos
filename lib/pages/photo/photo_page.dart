@@ -164,6 +164,7 @@ class _PhotoPageState extends ConsumerState<PhotoPage> with TickerProviderStateM
         .of(context)
         .scaffoldBackgroundColor);
     final id = ref.watch(currentPhotoIdProvider);
+    final photo = ref.watch(photosProvider).photos.get(id);
 
     return Scaffold(
       backgroundColor: _isFullScreen ? ThemeModel.black : backgroundColor,
@@ -207,7 +208,7 @@ class _PhotoPageState extends ConsumerState<PhotoPage> with TickerProviderStateM
                     curve: Curves.easeOut,
                     child: Hero(
                       tag: id,
-                      child: PhotoWidget(id: id, fit: BoxFit.fitWidth,),
+                      child: PhotoWidget(photo: photo, fit: BoxFit.fitWidth,),
                     ),
                   ),
                 ),

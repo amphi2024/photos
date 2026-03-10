@@ -3,8 +3,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:photos/providers/providers.dart';
 import 'package:photos/utils/screen_size.dart';
 
-import '../pages/photo/desktop_photo_page.dart';
-import '../pages/photo/photo_page.dart';
 import '../providers/current_photo_id_provider.dart';
 
 void onPhotoPressed({required WidgetRef ref, required String currentPhotoId, required String photoId, required BuildContext context, required List<String>? selectedItems}) {
@@ -28,22 +26,4 @@ void onPhotoPressed({required WidgetRef ref, required String currentPhotoId, req
   } else {
     ref.read(currentPhotoIdProvider.notifier).set(photoId);
   }
-  Navigator.of(context).push(
-    PageRouteBuilder(
-      opaque: false,
-      pageBuilder: (context, animation, secondaryAnimation) {
-        if (isDesktop()) {
-          return DesktopPhotoPage(id: photoId);
-        }
-        return const PhotoPage();
-      },
-      transitionsBuilder: (context, animation, secondaryAnimation, child) {
-        return FadeTransition(
-          opacity: animation,
-          child: child,
-        );
-      },
-      transitionDuration: const Duration(milliseconds: 300),
-    ),
-  );
 }

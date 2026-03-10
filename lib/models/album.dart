@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:amphi/utils/json_value_extractor.dart';
 import 'package:photos/channels/app_web_channel.dart';
 import 'package:photos/models/photo.dart';
+import 'package:photos/providers/photos_provider.dart';
 import 'package:sqflite/sqflite.dart';
 
 import '../database/database_helper.dart';
@@ -35,10 +36,17 @@ class Album {
         note = data["note"],
         coverPhotoIndex = data["cover_photo_index"];
 
-  List<dynamic> getVisiblePhotos(Map<String, Photo> photoMap) {
+  List<String> getVisiblePhotos(Map<String, Photo> photoMap) {
     return photos.where((id) => photoMap[id]?.deleted == null && photoMap.containsKey(id)).toList();
   }
 
+  Photo? getCoverPhoto(Map<String, Photo> photoMap) {
+    final firstId = getVisiblePhotos(photoMap).firstOrNull;
+    if(firstId != null) {
+      return photoMap.get(firstId);
+    }
+    return null;
+  }
 
   Future<void> save({bool upload = true}) async {
     if (id.isEmpty) {

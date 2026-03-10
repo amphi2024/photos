@@ -15,18 +15,14 @@ class AlbumThumbnail extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final photoId = album
-        .getVisiblePhotos(ref
-        .watch(photosProvider)
-        .photos)
-        .firstOrNull;
+    final photos = ref.watch(photosProvider).photos;
+    final coverPhoto = album.getCoverPhoto(photos);
 
-    if(photoId != null) {
+    if(coverPhoto != null) {
       return ClipRRect(
           borderRadius: BorderRadius.circular(_radius),
-          child: SizedBox.expand(child: PhotoWidget(id: photoId, fit: BoxFit.cover, thumbnail: true)));
+          child: SizedBox.expand(child: PhotoWidget(photo: coverPhoto, fit: BoxFit.cover, thumbnail: true)));
     }
-    else {
       return Container(
         decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(_radius),
@@ -40,5 +36,4 @@ class AlbumThumbnail extends ConsumerWidget {
         ),
       );
     }
-  }
 }
