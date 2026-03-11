@@ -26,6 +26,8 @@ class PhotosView extends ConsumerStatefulWidget {
 }
 
 class _PhotosViewState extends ConsumerState<PhotosView> with FragmentViewMixin {
+  double scaleValue = 1.0;
+
   Future<void> refresh() async {
     await Future.delayed(const Duration(milliseconds: 1000));
     appStorage.refreshDataWithServer(ref);
@@ -45,17 +47,15 @@ class _PhotosViewState extends ConsumerState<PhotosView> with FragmentViewMixin 
 
     return GestureDetector(
       onScaleUpdate: (d) {
-        if (d.scale < 0.8 && axisCount < maximumAxisCount) {
-          ref.read(axisCountProvider.notifier).set(axisCount + 1);
-          return;
-        }
-
-        if (d.scale > 1.2 && axisCount > 1) {
-          ref.read(axisCountProvider.notifier).set(axisCount - 1);
-          return;
-        }
+        scaleValue = d.scale;
       },
       onScaleEnd: (d) {
+        if (scaleValue < 0.8 && axisCount < maximumAxisCount) {
+          ref.read(axisCountProvider.notifier).set(axisCount + 1);
+        }
+        else if (scaleValue > 1.2 && axisCount > 1) {
+          ref.read(axisCountProvider.notifier).set(axisCount - 1);
+        }
         appCacheData.axisCount = axisCount;
         appCacheData.save();
       },
