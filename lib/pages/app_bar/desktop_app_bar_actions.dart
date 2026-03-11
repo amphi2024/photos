@@ -39,7 +39,7 @@ List<Widget> desktopAppbarActions({required Photo currentPhoto, required WidgetR
                   makePhotosAvailableOffline(ref);
                 }),
             PopupMenuItem(
-                child: Text(AppLocalizations.of(context).get("make_only_only")),
+                child: Text(AppLocalizations.of(context).get("make_online_only")),
                 onTap: () {
                   makePhotosOnlineOnly(ref: ref, selectedItems: selectedItems);
                 }),

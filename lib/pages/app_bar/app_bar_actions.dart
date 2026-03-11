@@ -125,7 +125,7 @@ List<Widget> photoSelectionActions({required BuildContext context, required Widg
               makePhotosAvailableOffline(ref);
             }),
         PopupMenuItem(
-            child: Text(AppLocalizations.of(context).get("remove_offline_copy")),
+            child: Text(AppLocalizations.of(context).get("make_online_only")),
             onTap: () {
               if(selectedItems != null) {
                 makePhotosOnlineOnly(ref: ref, selectedItems: selectedItems);

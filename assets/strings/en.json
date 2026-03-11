@@ -91,5 +91,5 @@
   "server_update_message": "New server version available. Update recommended.",
 
   "make_available_offline": "Make available offline",
-  "make_only_only": "Make online only"
+  "make_online_only": "Make online only"
 }
