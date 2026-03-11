@@ -104,13 +104,13 @@ class PhotosViewGridItem extends ConsumerWidget {
                 progressColor: Theme.of(context).highlightColor),
           )
         ],
-        // if (!photo.availableOnOffline) ... [
-        //   Positioned(
-        //     right: 5,
-        //     bottom: 5,
-        //     child: Icon(Icons.cloud, color: Theme.of(context).disabledColor),
-        //   )
-        // ]
+        if (!photo.availableOnOffline) ... [
+          Positioned(
+            right: 5,
+            bottom: 5,
+            child: Icon(Icons.cloud, color: Theme.of(context).disabledColor),
+          )
+        ]
       ],
     );
   }
