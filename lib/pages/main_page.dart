@@ -39,6 +39,9 @@ class MainPageState extends ConsumerState<MainPage> {
     final fragmentIndex = ref.watch(fragmentIndexProvider);
     final selectedItems = ref.watch(selectedItemsProvider);
     final selectingItems = selectedItems != null;
+    final photosState = ref.watch(photosProvider);
+    final photoIdList = photosState.idList;
+    final trashIdList = photosState.trash;
 
     return PopScope(
       canPop: !selectingItems,
@@ -64,8 +67,7 @@ class MainPageState extends ConsumerState<MainPage> {
             Positioned.fill(
                 child: PageView(
                   onPageChanged: (index) {
-                    final previousIndex = ref.watch(fragmentIndexProvider);
-                    if (previousIndex == FragmentIndex.settings) {
+                    if (fragmentIndex == FragmentIndex.settings) {
                       appSettings.save();
                     }
                     ref.read(fragmentIndexProvider.notifier).set(index);
@@ -76,13 +78,9 @@ class MainPageState extends ConsumerState<MainPage> {
                   },
                   controller: appState.pageController,
                   children: [
-                    PhotosView(photos: ref
-                        .watch(photosProvider)
-                        .idList, placeholder: AppLocalizations.of(context).get("@no_photos")),
+                    PhotosView(photos: photoIdList, placeholder: AppLocalizations.of(context).get("@no_photos")),
                     const AlbumsView(),
-                    PhotosView(photos: ref
-                        .watch(photosProvider)
-                        .trash, placeholder: AppLocalizations.of(context).get("@no_photos_trash")),
+                    PhotosView(photos: trashIdList, placeholder: AppLocalizations.of(context).get("@no_photos_trash")),
                     const SettingsView(),
                   ],)
             ),
