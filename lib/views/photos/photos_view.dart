@@ -77,7 +77,7 @@ class _PhotosViewState extends ConsumerState<PhotosView> with FragmentViewMixin 
                   }
                 },
                 onTap: () {
-                  onPhotoPressed(ref: ref, currentPhotoId: currentPhotoId, photoId: id, context: context, selectedItems: selectedItems);
+                  onPhotoPressed(ref: ref, currentPhotoId: currentPhotoId, photo: photo, context: context, selectedItems: selectedItems);
                 },
                 child: PhotosViewGridItem(key: ValueKey(id), photo: photo),
               );

@@ -13,7 +13,6 @@ import '../../channels/app_method_channel.dart';
 const double photoPageTitleBarHeight = 40;
 
 class PhotoPage extends ConsumerStatefulWidget {
-
   const PhotoPage({super.key});
 
   @override
@@ -208,7 +207,9 @@ class _PhotoPageState extends ConsumerState<PhotoPage> with TickerProviderStateM
                     curve: Curves.easeOut,
                     child: Hero(
                       tag: id,
-                      child: PhotoWidget(photo: photo, fit: BoxFit.fitWidth,),
+                      child: SizedBox(
+                          width: MediaQuery.of(context).size.width,
+                          child: PhotoWidget(photo: photo, fit: BoxFit.fitWidth, thumbnail: false)),
                     ),
                   ),
                 ),
