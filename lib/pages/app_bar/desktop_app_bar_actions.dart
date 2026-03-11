@@ -4,7 +4,6 @@ import 'package:amphi/models/app_localizations.dart';
 import 'package:bitsdojo_window/bitsdojo_window.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:photos/components/search_button.dart';
 import 'package:photos/models/app_cache.dart';
 import 'package:photos/models/fragment_index.dart';
 import 'package:photos/models/photo.dart';
@@ -95,7 +94,6 @@ List<Widget> desktopAppbarActions({required Photo currentPhoto, required WidgetR
             return mainPageAppBarPopupMenuItems(ref: ref, fragmentIndex: fragmentIndex, context: context);
           },
           icon: const Icon(Icons.grid_view_rounded)),
-      const SearchButton(),
       PopupMenuButton(
           tooltip: "",
           itemBuilder: (context) {
