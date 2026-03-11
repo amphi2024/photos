@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:amphi/models/app_storage_core.dart';
 import 'package:amphi/models/update_event.dart';
 import 'package:amphi/utils/path_utils.dart';
@@ -38,6 +40,11 @@ class AppStorage extends AppStorageCore {
       appWebChannel.getEvents(onSuccess: (updateEvents) async {
         for (UpdateEvent updateEvent in updateEvents) {
           syncData(updateEvent, ref);
+        }
+      }, onFailed: (code) {
+        if(code == HttpStatus.unauthorized) {
+          appStorage.selectedUser.token = "";
+          appStorage.saveSelectedUserInformation();
         }
       });
     }
