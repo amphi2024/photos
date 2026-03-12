@@ -91,5 +91,8 @@
   "server_update_message": "New server version available. Update recommended.",
 
   "make_available_offline": "Make available offline",
-  "make_online_only": "Make online only"
+  "make_online_only": "Make online only",
+
+  "window_controls_on_left": "Window Controls on Left",
+  "prefers_custom_title_bar": "Prefers Custom Title bar"
 }

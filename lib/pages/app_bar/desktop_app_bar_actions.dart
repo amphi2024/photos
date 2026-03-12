@@ -1,10 +1,12 @@
 import 'dart:io';
 
 import 'package:amphi/models/app_localizations.dart';
+import 'package:amphi/widgets/window/adwaita_window_buttons.dart';
 import 'package:bitsdojo_window/bitsdojo_window.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:photos/models/app_cache.dart';
+import 'package:photos/models/app_settings.dart';
 import 'package:photos/models/fragment_index.dart';
 import 'package:photos/models/photo.dart';
 
@@ -21,15 +23,25 @@ import '../../utils/handle_offline_access.dart';
 import '../../utils/photo_utils.dart';
 import '../../utils/remove_photos_from_album.dart';
 import '../../utils/screen_size.dart';
+import '../../utils/window_control.dart';
 import 'app_bar_popup_menu.dart';
 
-List<Widget> desktopAppbarActions({required Photo currentPhoto, required WidgetRef ref, required int axisCount, required BuildContext context, required int fragmentIndex, required List<String>? selectedItems, required String currentAlbumId}) {
+List<Widget> desktopAppbarActions(
+    {required Photo currentPhoto,
+    required WidgetRef ref,
+    required int axisCount,
+    required BuildContext context,
+    required int fragmentIndex,
+    required List<String>? selectedItems,
+    required String currentAlbumId}) {
   if (currentPhoto.id.isEmpty) {
-    if(selectedItems != null) {
+    if (selectedItems != null) {
       return [
-        IconButton(onPressed: () {
-          ref.read(selectedItemsProvider.notifier).endSelection();
-        }, icon: const Icon(Icons.check_circle_outline)),
+        IconButton(
+            onPressed: () {
+              ref.read(selectedItemsProvider.notifier).endSelection();
+            },
+            icon: const Icon(Icons.check_circle_outline)),
         Expanded(child: MoveWindow()),
         PopupMenuButton(itemBuilder: (context) {
           return [
@@ -45,28 +57,29 @@ List<Widget> desktopAppbarActions({required Photo currentPhoto, required WidgetR
                 }),
           ];
         }),
-        if(fragmentIndex == FragmentIndex.album) ... [
+        if (fragmentIndex == FragmentIndex.album) ...[
           IconButton(
               onPressed: () {
                 removePhotosFromAlbum(ref: ref, selectedItems: selectedItems, albumId: currentAlbumId);
               },
               icon: const Icon(Icons.remove)),
         ],
-        if(fragmentIndex == FragmentIndex.trash) ... [
+        if (fragmentIndex == FragmentIndex.trash) ...[
           IconButton(
               onPressed: () {
                 restoreSelectedPhotos(context: context, ref: ref);
               },
               icon: const Icon(Icons.restore)),
         ],
-        IconButton(onPressed: () {
-          if(fragmentIndex == FragmentIndex.trash) {
-            deleteSelectedPhotosPermanently(context: context, ref: ref);
-          }
-          else {
-            moveSelectedPhotosToTrash(ref: ref, context: context);
-          }
-        }, icon: const Icon(Icons.delete))
+        IconButton(
+            onPressed: () {
+              if (fragmentIndex == FragmentIndex.trash) {
+                deleteSelectedPhotosPermanently(context: context, ref: ref);
+              } else {
+                moveSelectedPhotosToTrash(ref: ref, context: context);
+              }
+            },
+            icon: const Icon(Icons.delete))
       ];
     }
     return [
@@ -89,7 +102,7 @@ List<Widget> desktopAppbarActions({required Photo currentPhoto, required WidgetR
       const Icon(Icons.add, size: 15),
       Expanded(child: MoveWindow()),
       PopupMenuButton(
-        tooltip: "",
+          tooltip: "",
           itemBuilder: (context) {
             return mainPageAppBarPopupMenuItems(ref: ref, fragmentIndex: fragmentIndex, context: context);
           },
@@ -124,6 +137,14 @@ List<Widget> desktopAppbarActions({required Photo currentPhoto, required WidgetR
           },
           icon: const Icon(Icons.add_circle_outline)),
       if (Platform.isWindows) ..._windowButtonsWindow(context),
+      if (Platform.isLinux && appSettings.prefersCustomTitleBar && !appSettings.windowButtonsOnLeft)
+        ...adwaitaWindowButtons(maximizeOrRestore: () {
+          maximizeOrRestore();
+        }, minimize: () {
+          minimize();
+        }, close: () {
+          close();
+        })
     ];
   }
   return [
@@ -148,38 +169,49 @@ List<Widget> desktopAppbarActions({required Photo currentPhoto, required WidgetR
     ),
     const Icon(Icons.add, size: 15),
     Expanded(child: MoveWindow()),
-    IconButton(onPressed: () {
-      sharePhoto(currentPhoto);
-    }, icon: const Icon(Icons.share)),
-    IconButton(onPressed: () {
-      showDialog(context: context, builder: (context) {
-        return Dialog(
-          child: SizedBox(
-            width: 350,
-            height: 400,
-            child: PhotoInfo(id: currentPhoto.id),
-          ),
-        );
-      });
-    }, icon: const Icon(Icons.info)),
+    IconButton(
+        onPressed: () {
+          sharePhoto(currentPhoto);
+        },
+        icon: const Icon(Icons.share)),
+    IconButton(
+        onPressed: () {
+          showDialog(
+              context: context,
+              builder: (context) {
+                return Dialog(
+                  child: SizedBox(
+                    width: 350,
+                    height: 400,
+                    child: PhotoInfo(id: currentPhoto.id),
+                  ),
+                );
+              });
+        },
+        icon: const Icon(Icons.info)),
     PopupMenuButton(
         itemBuilder: (context) {
           return [
             PopupMenuItem(
                 height: 30,
-                child: Text(AppLocalizations.of(context).get("@export_photo")), onTap: () {
-              exportPhoto(currentPhoto);
-            }),
+                child: Text(AppLocalizations.of(context).get("@export_photo")),
+                onTap: () {
+                  exportPhoto(currentPhoto);
+                }),
             PopupMenuItem(
                 height: 30,
-                child: Text(AppLocalizations.of(context).get("@edit_photo_info")), onTap: () {
-              showDialog(context: context, builder: (context) {
-                return EditPhotoInfoDialog(photo: currentPhoto);
-              });
-            }),
+                child: Text(AppLocalizations.of(context).get("@edit_photo_info")),
+                onTap: () {
+                  showDialog(
+                      context: context,
+                      builder: (context) {
+                        return EditPhotoInfoDialog(photo: currentPhoto);
+                      });
+                }),
           ];
         },
-        icon: const Icon(Icons.more_horiz), tooltip: ""),
+        icon: const Icon(Icons.more_horiz),
+        tooltip: ""),
     if (Platform.isWindows) ..._windowButtonsWindow(context),
   ];
 }

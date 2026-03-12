@@ -1,4 +1,7 @@
+import 'dart:io';
+
 import 'package:amphi/models/app_localizations.dart';
+import 'package:amphi/widgets/window/adwaita_window_buttons.dart';
 import 'package:bitsdojo_window/bitsdojo_window.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -7,6 +10,7 @@ import 'package:photos/models/app_cache.dart';
 import 'package:photos/pages/app_bar/app_bar_popup_menu.dart';
 import 'package:photos/providers/photos_provider.dart';
 import 'package:amphi/widgets/account/account_button.dart';
+import 'package:photos/utils/window_control.dart';
 
 import '../channels/app_method_channel.dart';
 import '../channels/app_web_channel.dart';
@@ -42,6 +46,14 @@ class DesktopNavMenu extends ConsumerWidget {
                 children: [
                   Row(
                     children: [
+                      if (Platform.isLinux && appSettings.prefersCustomTitleBar && appSettings.windowButtonsOnLeft)
+                        ...adwaitaWindowButtons(maximizeOrRestore: () {
+                          maximizeOrRestore();
+                        }, minimize: () {
+                          minimize();
+                        }, close: () {
+                          close();
+                        }),
                       Expanded(child: SizedBox(height: 50, child: MoveWindow())),
                       AccountButton(
                           onLoggedIn: ({required id, required token, required username}) {
@@ -148,10 +160,13 @@ class DesktopNavMenu extends ConsumerWidget {
                                             ? SizedBox(
                                                 width: 20,
                                                 height: 20,
-                                                child: PhotoWidget(photo: coverPhoto, thumbnail: true, thumbnailFallback: const Icon(
-                                                  Icons.photo_album,
-                                                  size: 16,
-                                                )),
+                                                child: PhotoWidget(
+                                                    photo: coverPhoto,
+                                                    thumbnail: true,
+                                                    thumbnailFallback: const Icon(
+                                                      Icons.photo_album,
+                                                      size: 16,
+                                                    )),
                                               )
                                             : const Icon(
                                                 Icons.photo_album,

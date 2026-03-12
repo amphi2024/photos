@@ -5,9 +5,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:photos/models/app_settings.dart';
 import 'package:photos/views/fragment_view_mixin.dart';
+import 'package:window_manager/window_manager.dart';
 
 import '../channels/app_method_channel.dart';
 import '../components/server_setting_component.dart';
+import '../main.dart';
 
 class SettingsView extends ConsumerStatefulWidget {
   const SettingsView({super.key});
@@ -70,6 +72,47 @@ class _SettingsViewState extends ConsumerState<SettingsView> with FragmentViewMi
                 appSettings.autoCheckUpdate = value;
               });
             }),
+        Visibility(
+            visible: Platform.isLinux,
+            child: Padding(
+              padding: const EdgeInsets.only(left: 10.0, right: 10),
+              child: Row(
+                children: [
+                  Text(AppLocalizations.of(context).get("prefers_custom_title_bar")),
+                  Checkbox(
+                      value: appSettings.prefersCustomTitleBar,
+                      onChanged: (value) {
+                        if (value != null) {
+                          mainScreenKey.currentState?.setState(() {
+                            appSettings.prefersCustomTitleBar = value;
+                            windowManager.setTitleBarStyle(appSettings.prefersCustomTitleBar ? TitleBarStyle.hidden : TitleBarStyle.normal);
+                          });
+                          setState(() {});
+                        }
+                      })
+                ],
+              ),
+            )),
+        Visibility(
+            visible: Platform.isLinux,
+            child: Padding(
+              padding: const EdgeInsets.only(left: 10.0, right: 10),
+              child: Row(
+                children: [
+                  Text(AppLocalizations.of(context).get("window_controls_on_left")),
+                  Checkbox(
+                      value: appSettings.windowButtonsOnLeft,
+                      onChanged: (value) {
+                        if (value != null) {
+                          mainScreenKey.currentState?.setState(() {
+                            appSettings.windowButtonsOnLeft = value;
+                          });
+                          setState(() {});
+                        }
+                      })
+                ],
+              ),
+            )),
       ],
     );
   }
