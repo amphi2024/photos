@@ -42,13 +42,7 @@ class DesktopNavMenu extends ConsumerWidget {
                 children: [
                   Row(
                     children: [
-                      Expanded(child: Builder(builder: (context) {
-                        if (isDesktop()) {
-                          return SizedBox(height: 50, child: MoveWindow());
-                        } else {
-                          return const SizedBox(height: 50);
-                        }
-                      })),
+                      Expanded(child: SizedBox(height: 50, child: MoveWindow())),
                       AccountButton(
                           onLoggedIn: ({required id, required token, required username}) {
                             onLoggedIn(id: id, token: token, username: username, context: context, ref: ref);
