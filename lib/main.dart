@@ -31,30 +31,29 @@ void main() async {
 
   await appCacheData.getData();
 
-  appStorage.initialize(() async {
-    await appSettings.getData();
+  await appStorage.initialize();
+  await appSettings.getData();
 
-    final photosState = await PhotosNotifier.initialized();
-    final albumsState = await AlbumsNotifier.initialized(photosState.photos);
+  final photosState = await PhotosNotifier.initialized();
+  final albumsState = await AlbumsNotifier.initialized(photosState.photos);
 
-    runApp(ProviderScope(
-        overrides: [
-          photosProvider.overrideWithBuild((ref, notifier) => photosState),
-          albumsProvider.overrideWithBuild((ref, notifier) => albumsState)
-        ],
-        child: MyApp(key: mainScreenKey)));
+  runApp(ProviderScope(
+      overrides: [
+        photosProvider.overrideWithBuild((ref, notifier) => photosState),
+        albumsProvider.overrideWithBuild((ref, notifier) => albumsState)
+      ],
+      child: MyApp(key: mainScreenKey)));
 
-    if (isDesktop()) {
-      doWhenWindowReady(() {
-        appWindow.minSize = const Size(550, 300);
-        appWindow.size =
-            Size(appCacheData.windowWidth, appCacheData.windowHeight);
-        appWindow.alignment = Alignment.center;
-        appWindow.title = "Photos";
-        appWindow.show();
-      });
-    }
-  });
+  if (isDesktop()) {
+    doWhenWindowReady(() {
+      appWindow.minSize = const Size(550, 300);
+      appWindow.size =
+          Size(appCacheData.windowWidth, appCacheData.windowHeight);
+      appWindow.alignment = Alignment.center;
+      appWindow.title = "Photos";
+      appWindow.show();
+    });
+  }
 }
 
 class MyApp extends ConsumerStatefulWidget {
