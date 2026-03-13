@@ -13,8 +13,8 @@ packages:
     dependency: "direct main"
     description:
       path: "."
-      ref: "6d106ee1839fc723e764b0b258bbb3c7c85f6e27"
-      resolved-ref: "6d106ee1839fc723e764b0b258bbb3c7c85f6e27"
+      ref: "6736cc8380179e8fe1cb5d381d9af37b7585dfe5"
+      resolved-ref: "6736cc8380179e8fe1cb5d381d9af37b7585dfe5"
       url: "https://github.com/amphi2024/flutter-shared.git"
     source: git
     version: "2.3.0"
