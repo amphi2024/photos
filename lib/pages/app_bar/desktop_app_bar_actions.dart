@@ -138,7 +138,7 @@ List<Widget> desktopAppbarActions(
           icon: const Icon(Icons.add_circle_outline)),
       if (Platform.isWindows) ..._windowButtonsWindow(context),
       if (Platform.isLinux && appSettings.prefersCustomTitleBar && !appSettings.windowButtonsOnLeft)
-        ...adwaitaWindowButtons(maximizeOrRestore: () {
+        ...adwaitaWindowButtons(rightPadding: 5, maximizeOrRestore: () {
           maximizeOrRestore();
         }, minimize: () {
           minimize();

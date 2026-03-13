@@ -47,7 +47,7 @@ class DesktopNavMenu extends ConsumerWidget {
                   Row(
                     children: [
                       if (Platform.isLinux && appSettings.prefersCustomTitleBar && appSettings.windowButtonsOnLeft)
-                        ...adwaitaWindowButtons(maximizeOrRestore: () {
+                        ...adwaitaWindowButtons(leftPadding: 5, maximizeOrRestore: () {
                           maximizeOrRestore();
                         }, minimize: () {
                           minimize();
