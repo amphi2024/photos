@@ -61,7 +61,7 @@ void main() async {
       ],
       child: MyApp(key: mainScreenKey)));
 
-  if (isDesktop()) {
+  if (Platform.isWindows || Platform.isMacOS) {
     doWhenWindowReady(() {
       appWindow.minSize = const Size(550, 300);
       appWindow.size =
