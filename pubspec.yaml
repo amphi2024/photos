@@ -61,7 +61,7 @@ dependencies:
   amphi:
     git:
       url: https://github.com/amphi2024/flutter-shared.git
-      ref: e97142261d21b58f682e149e6a918c01f3403203
+      ref: 0036adb505b9072563f181ef8bcf8fae5a017367
 #    path: ../amphi
   window_manager: ^0.5.1
   handy_window: ^0.4.0
