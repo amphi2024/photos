@@ -15,6 +15,7 @@ import 'package:photos/providers/albums_provider.dart';
 import 'package:photos/providers/photos_provider.dart';
 import 'package:photos/utils/screen_size.dart';
 import 'package:sqflite_common_ffi/sqflite_ffi.dart';
+import 'package:window_manager/window_manager.dart';
 import 'channels/app_web_channel.dart';
 import 'models/app_cache.dart';
 import 'pages/main_page.dart';
@@ -36,6 +37,22 @@ void main() async {
 
   final photosState = await PhotosNotifier.initialized();
   final albumsState = await AlbumsNotifier.initialized(photosState.photos);
+
+  if (Platform.isLinux) {
+    await windowManager.ensureInitialized();
+
+    WindowOptions windowOptions = WindowOptions(
+      size: Size(appCacheData.data["windowWidth"] ?? 1280, appCacheData.data["windowHeight"] ?? 720),
+      center: true,
+      backgroundColor: Colors.transparent,
+      skipTaskbar: false,
+      titleBarStyle: appSettings.prefersCustomTitleBar ? TitleBarStyle.hidden : TitleBarStyle.normal,
+    );
+    windowManager.waitUntilReadyToShow(windowOptions, () async {
+      await windowManager.show();
+      await windowManager.focus();
+    });
+  }
 
   runApp(ProviderScope(
       overrides: [
