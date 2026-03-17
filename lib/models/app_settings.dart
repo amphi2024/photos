@@ -69,8 +69,3 @@ class AppSettings {
     file.writeAsString(jsonEncode(data));
   }
 }
-
-const int SORT_OPTION_TITLE = 0;
-const int SORT_OPTION_CREATE_DATE = 1;
-const int SORT_OPTION_MODIFIED_DATE = 2;
-const int SORT_OPTION_DELETED_DATE = 3;
