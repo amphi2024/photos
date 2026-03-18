@@ -94,5 +94,6 @@
   "make_online_only": "Make online only",
 
   "window_controls_on_left": "Window Controls on Left",
-  "prefers_custom_title_bar": "Prefers Custom Title bar"
+  "prefers_custom_title_bar": "Prefers Custom Title bar",
+  "failed_to_parse_theme": "Failed to parse theme"
 }

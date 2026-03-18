@@ -1,13 +1,14 @@
 import 'dart:io';
 
 import 'package:amphi/models/app_localizations.dart';
-import 'package:amphi/widgets/window/adwaita_window_buttons.dart';
+import 'package:amphi/widgets/window/adaptive_linux_window_buttons.dart';
 import 'package:bitsdojo_window/bitsdojo_window.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:photos/components/photo_widget.dart';
 import 'package:photos/models/app_cache.dart';
 import 'package:photos/pages/app_bar/app_bar_popup_menu.dart';
+import 'package:photos/providers/csd_themes_provider.dart';
 import 'package:photos/providers/photos_provider.dart';
 import 'package:amphi/widgets/account/account_button.dart';
 import 'package:photos/utils/window_control.dart';
@@ -33,6 +34,8 @@ class DesktopNavMenu extends ConsumerWidget {
     final albumsState = ref.watch(albumsProvider);
     final sidebarWidth = ref.watch(sidebarWidthProvider);
     final photos = ref.watch(photosProvider).photos;
+    final csdThemes = ref.watch(csdThemesProvider).themes;
+    final csdTheme = csdThemes[appSettings.selectedWindowButtonsTheme];
 
     return Container(
         width: sidebarWidth,
@@ -47,13 +50,7 @@ class DesktopNavMenu extends ConsumerWidget {
                   Row(
                     children: [
                       if (Platform.isLinux && appSettings.prefersCustomTitleBar && appSettings.windowButtonsOnLeft)
-                        ...adwaitaWindowButtons(leftPadding: 4.5, maximizeOrRestore: () {
-                          maximizeOrRestore();
-                        }, minimize: () {
-                          minimize();
-                        }, close: () {
-                          close();
-                        }),
+                        AdaptiveLinuxWindowButtons(theme: csdTheme, padding: 4.5, onClose: saveWindowSize, windowButtonsOnLeft: true),
                       Expanded(child: SizedBox(height: 50, child: MoveWindow())),
                       AccountButton(
                           onLoggedIn: ({required id, required token, required username}) {

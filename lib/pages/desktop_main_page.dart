@@ -12,6 +12,8 @@ import 'package:photos/providers/photos_provider.dart';
 import 'package:photos/providers/providers.dart';
 import 'package:photos/views/photos/photos_view.dart';
 
+import '../models/app_settings.dart';
+import '../providers/csd_themes_provider.dart';
 import '../utils/update_check.dart';
 
 const double desktopTitleBarHeight = 50;
@@ -49,22 +51,15 @@ class DesktopMainPageState extends ConsumerState<DesktopMainPage> {
     final currentPhotoId = ref.watch(currentPhotoIdProvider);
     final currentAlbumId = ref.watch(currentAlbumIdProvider);
     final sidebarWidth = ref.watch(sidebarWidthProvider);
+    final csdThemes = ref.watch(csdThemesProvider).themes;
+    final csdTheme = csdThemes[appSettings.selectedWindowButtonsTheme];
 
     final axisCount = ref.watch(axisCountProvider);
     final currentPhoto = ref.watch(photosProvider).photos.get(currentPhotoId);
     final (idList, placeholder) = switch (fragmentIndex) {
-      FragmentIndex.photos => (
-      ref.watch(photosProvider).idList,
-      AppLocalizations.of(context).get("@no_photos")
-      ),
-      FragmentIndex.trash => (
-      ref.watch(photosProvider).trash,
-      AppLocalizations.of(context).get("@no_photos_trash")
-      ),
-      _ => (
-      ref.watch(albumsProvider).albums.get(ref.watch(currentAlbumIdProvider)).photos,
-      AppLocalizations.of(context).get("@no_photos_album")
-      ),
+      FragmentIndex.photos => (ref.watch(photosProvider).idList, AppLocalizations.of(context).get("@no_photos")),
+      FragmentIndex.trash => (ref.watch(photosProvider).trash, AppLocalizations.of(context).get("@no_photos_trash")),
+      _ => (ref.watch(albumsProvider).albums.get(ref.watch(currentAlbumIdProvider)).photos, AppLocalizations.of(context).get("@no_photos_album")),
     };
 
     return Scaffold(
@@ -92,7 +87,8 @@ class DesktopMainPageState extends ConsumerState<DesktopMainPage> {
                             context: context,
                             fragmentIndex: fragmentIndex,
                             selectedItems: selectedItems,
-                        currentAlbumId: currentAlbumId)),
+                            currentAlbumId: currentAlbumId,
+                            csdTheme: csdTheme)),
                   ),
                   Expanded(
                       //TODO: optimize it with custom component instead of nested material app

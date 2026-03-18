@@ -16,20 +16,3 @@ Future<void> saveWindowSize() async {
   }
   await appCacheData.save();
 }
-
-void minimize() {
-  windowManager.minimize();
-}
-
-void maximizeOrRestore() async {
-  if (!(await windowManager.isMaximizable())) {
-    windowManager.unmaximize();
-  } else {
-    windowManager.maximize();
-  }
-}
-
-void close() async {
-  await saveWindowSize();
-  windowManager.close();
-}

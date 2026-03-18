@@ -12,6 +12,7 @@ import 'package:photos/models/app_storage.dart';
 import 'package:photos/pages/desktop_main_page.dart';
 import 'package:photos/pages/tablet_main_page.dart';
 import 'package:photos/providers/albums_provider.dart';
+import 'package:photos/providers/csd_themes_provider.dart';
 import 'package:photos/providers/photos_provider.dart';
 import 'package:photos/utils/screen_size.dart';
 import 'package:sqflite_common_ffi/sqflite_ffi.dart';
@@ -37,6 +38,7 @@ void main() async {
 
   final photosState = await PhotosNotifier.initialized();
   final albumsState = await AlbumsNotifier.initialized(photosState.photos);
+  final csdThemesState = await CsdThemesNotifier.initialized();
 
   if (Platform.isLinux) {
     await windowManager.ensureInitialized();
@@ -57,7 +59,8 @@ void main() async {
   runApp(ProviderScope(
       overrides: [
         photosProvider.overrideWithBuild((ref, notifier) => photosState),
-        albumsProvider.overrideWithBuild((ref, notifier) => albumsState)
+        albumsProvider.overrideWithBuild((ref, notifier) => albumsState),
+        csdThemesProvider.overrideWithBuild((ref, notifier) => csdThemesState)
       ],
       child: MyApp(key: mainScreenKey)));
 

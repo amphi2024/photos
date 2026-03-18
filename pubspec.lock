@@ -13,8 +13,8 @@ packages:
     dependency: "direct main"
     description:
       path: "."
-      ref: "6736cc8380179e8fe1cb5d381d9af37b7585dfe5"
-      resolved-ref: "6736cc8380179e8fe1cb5d381d9af37b7585dfe5"
+      ref: fcaa0e8fc8446c67cdf7e73be7954c0ca41fd1d9
+      resolved-ref: fcaa0e8fc8446c67cdf7e73be7954c0ca41fd1d9
       url: "https://github.com/amphi2024/flutter-shared.git"
     source: git
     version: "2.3.0"
@@ -470,6 +470,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "4.0.0"
+  linux_csd_buttons:
+    dependency: "direct main"
+    description:
+      name: linux_csd_buttons
+      sha256: dc5df174b2438d7d1f7ac3162fb7fe14d11c47c3767546c0361ebbafd547b4c2
+      url: "https://pub.dev"
+    source: hosted
+    version: "1.1.0"
   logging:
     dependency: transitive
     description:

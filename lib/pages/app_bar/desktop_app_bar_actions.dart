@@ -1,10 +1,11 @@
 import 'dart:io';
 
 import 'package:amphi/models/app_localizations.dart';
-import 'package:amphi/widgets/window/adwaita_window_buttons.dart';
+import 'package:amphi/widgets/window/adaptive_linux_window_buttons.dart';
 import 'package:bitsdojo_window/bitsdojo_window.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:linux_csd_buttons/linux_csd_buttons.dart';
 import 'package:photos/models/app_cache.dart';
 import 'package:photos/models/app_settings.dart';
 import 'package:photos/models/fragment_index.dart';
@@ -33,7 +34,8 @@ List<Widget> desktopAppbarActions(
     required BuildContext context,
     required int fragmentIndex,
     required List<String>? selectedItems,
-    required String currentAlbumId}) {
+    required String currentAlbumId,
+    required CsdTheme? csdTheme}) {
   if (currentPhoto.id.isEmpty) {
     if (selectedItems != null) {
       return [
@@ -137,14 +139,7 @@ List<Widget> desktopAppbarActions(
           },
           icon: const Icon(Icons.add_circle_outline)),
       if (Platform.isWindows) ..._windowButtonsWindow(context),
-      if (Platform.isLinux && appSettings.prefersCustomTitleBar && !appSettings.windowButtonsOnLeft)
-        ...adwaitaWindowButtons(rightPadding: 4.5, maximizeOrRestore: () {
-          maximizeOrRestore();
-        }, minimize: () {
-          minimize();
-        }, close: () {
-          close();
-        })
+      if (Platform.isLinux && appSettings.prefersCustomTitleBar && !appSettings.windowButtonsOnLeft) AdaptiveLinuxWindowButtons(theme: csdTheme, padding: 4.5, onClose: saveWindowSize, windowButtonsOnLeft: false)
     ];
   }
   return [

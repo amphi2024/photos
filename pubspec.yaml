@@ -61,13 +61,14 @@ dependencies:
   amphi:
     git:
       url: https://github.com/amphi2024/flutter-shared.git
-      ref: 6736cc8380179e8fe1cb5d381d9af37b7585dfe5
+      ref: fcaa0e8fc8446c67cdf7e73be7954c0ca41fd1d9
 #    path: ../amphi
   window_manager: ^0.5.1
   handy_window: ^0.4.0
   libadwaita: ^2.0.2
   modern_titlebar_buttons: ^1.1.2
   cupertino_icons: ^1.0.8
+  linux_csd_buttons: ^1.1.0
 
 dev_dependencies:
   flutter_test:

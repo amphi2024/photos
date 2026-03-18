@@ -46,11 +46,11 @@ class AppSettings {
   set windowButtonsOnLeft(bool value) => data["windowButtonsOnLeft"] = value;
   bool get windowButtonsOnLeft => data["windowButtonsOnLeft"] ?? false;
 
-  set windowControlsStyle(String? value) => data["windowControlsStyle"] = value;
-  String? get windowControlsStyle => data["windowControlsStyle"];
-
   set prefersCustomTitleBar(bool value) => data["prefersCustomTitleBar"] = value;
   bool get prefersCustomTitleBar => data["prefersCustomTitleBar"] ?? true;
+
+  set selectedWindowButtonsTheme(String? value) => data["selectedWindowButtonsTheme"] = value;
+  String? get selectedWindowButtonsTheme => data["selectedWindowButtonsTheme"];
 
   Future<void> getData() async {
     try {
