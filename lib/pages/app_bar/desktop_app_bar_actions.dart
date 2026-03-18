@@ -212,12 +212,13 @@ List<Widget> desktopAppbarActions(
 }
 
 List<Widget> _windowButtonsWindow(BuildContext context) {
+  final iconColor = Theme.of(context).textTheme.bodyMedium!.color;
   final colors = CustomWindowButtonColors(
-      iconMouseOver: Theme.of(context).textTheme.bodyMedium?.color,
+      iconMouseOver: iconColor,
       mouseOver: const Color.fromRGBO(125, 125, 125, 0.1),
-      iconNormal: Theme.of(context).textTheme.bodyMedium?.color,
+      iconNormal: iconColor,
       mouseDown: const Color.fromRGBO(125, 125, 125, 0.1),
-      iconMouseDown: Theme.of(context).textTheme.bodyMedium?.color,
+      iconMouseDown: iconColor,
       normal: Theme.of(context).scaffoldBackgroundColor);
   return [
     Visibility(
@@ -241,7 +242,7 @@ List<Widget> _windowButtonsWindow(BuildContext context) {
         colors: CustomWindowButtonColors(
             mouseOver: const Color(0xFFD32F2F),
             mouseDown: const Color(0xFFB71C1C),
-            iconNormal: const Color(0xFF805306),
+            iconNormal: iconColor,
             iconMouseOver: const Color(0xFFFFFFFF),
             normal: Theme.of(context).scaffoldBackgroundColor))
   ];
