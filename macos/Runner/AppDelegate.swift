@@ -46,16 +46,21 @@ class AppDelegate: FlutterAppDelegate {
                   NotificationCenter.default.addObserver(self, selector: #selector(onExitFullScreen), name: NSWindow.didExitFullScreenNotification, object: nil)
     }
 
-     @objc func onEnterFullScreen(notification: Notification) {
-            mainFlutterWindow?.toolbar = nil
-            methodChannel?.invokeMethod("on_enter_fullscreen", arguments: nil)
-        }
+    @objc func onEnterFullScreen(notification: Notification) {
+        mainFlutterWindow?.toolbar = nil
+        methodChannel?.invokeMethod("on_enter_fullscreen", arguments: nil)
+    }
 
-        @objc func onExitFullScreen(notification: Notification) {
-            mainFlutterWindow?.toolbar = NSToolbar()
-            if #available(macOS 11.0, *) {
-                mainFlutterWindow?.toolbarStyle = .unified
-            }
-           methodChannel?.invokeMethod("on_exit_fullscreen", arguments: nil)
+    @objc func onExitFullScreen(notification: Notification) {
+        mainFlutterWindow?.toolbar = NSToolbar()
+        if #available(macOS 11.0, *) {
+            mainFlutterWindow?.toolbarStyle = .unified
         }
+       methodChannel?.invokeMethod("on_exit_fullscreen", arguments: nil)
+    }
+
+    @objc func onWindowWillClose(notification: Notification) {
+        methodChannel?.invokeMethod("on_window_close", arguments: nil)
+    }
+
 }

@@ -4,6 +4,7 @@ import 'package:flutter/services.dart';
 import 'package:photos/models/photo.dart';
 
 import '../models/app_settings.dart';
+import '../utils/window_control.dart';
 
 final appMethodChannel = AppMethodChannel.getInstance();
 
@@ -13,6 +14,19 @@ class AppMethodChannel extends MethodChannel {
   AppMethodChannel._internal(super.name) {
     setMethodCallHandler((call) async {
       switch (call.method) {
+        case "on_enter_fullscreen":
+          for(var function in fullScreenListeners) {
+            function(true);
+          }
+          break;
+        case "on_exit_fullscreen":
+          for(var function in fullScreenListeners) {
+            function(false);
+          }
+          break;
+        case "on_window_close":
+          await saveWindowSize();
+          break;
         default:
           break;
       }
@@ -21,6 +35,7 @@ class AppMethodChannel extends MethodChannel {
 
   int systemVersion = 0;
 
+  List<void Function(bool)> fullScreenListeners = [];
   static AppMethodChannel getInstance() => _instance;
 
   void setNavigationBarColor(Color color) {
