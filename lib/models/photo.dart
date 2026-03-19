@@ -73,7 +73,7 @@ class Photo {
     await photoFile.writeAsBytes(bytes);
 
     photo.photoPath = photoFile.path;
-    photo.title = PathUtils.basename(originalFile.path);
+    photo.title = PathUtils.basenameWithoutExtension(originalFile.path);
     photo.created = DateTime.now();
     photo.modified = DateTime.now();
     photo.date = DateTime.now();
