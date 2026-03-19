@@ -41,46 +41,46 @@ class LinuxTitleBarSettingsState extends ConsumerState<LinuxTitleBarSettings> {
     return Column(
       children: [
         Padding(
-              padding: const EdgeInsets.only(left: 10.0, right: 10),
-              child: Row(
-                children: [
-                  Text(AppLocalizations.of(context).get("prefers_custom_title_bar")),
-                  Checkbox(
-                      value: appSettings.prefersCustomTitleBar,
-                      onChanged: (value) {
-                        if (value != null) {
-                          mainScreenKey.currentState?.setState(() {
-                            appSettings.prefersCustomTitleBar = value;
-                            windowManager.setTitleBarStyle(appSettings.prefersCustomTitleBar ? TitleBarStyle.hidden : TitleBarStyle.normal);
-                          });
-                          setState(() {
+          padding: const EdgeInsets.only(left: 10.0, right: 10),
+          child: Row(
+            children: [
+              Text(AppLocalizations.of(context).get("prefers_custom_title_bar")),
+              Checkbox(
+                  value: appSettings.prefersCustomTitleBar,
+                  onChanged: (value) {
+                    if (value != null) {
+                      mainScreenKey.currentState?.setState(() {
+                        appSettings.prefersCustomTitleBar = value;
+                        windowManager.setTitleBarStyle(appSettings.prefersCustomTitleBar ? TitleBarStyle.hidden : TitleBarStyle.normal);
+                      });
+                      setState(() {
 
-                          });
-                        }
-                      })
-                ],
-              ),
-            ),
-       Padding(
-              padding: const EdgeInsets.only(left: 10.0, right: 10),
-              child: Row(
-                children: [
-                  Text(AppLocalizations.of(context).get("window_controls_on_left")),
-                  Checkbox(
-                      value: appSettings.windowButtonsOnLeft,
-                      onChanged: (value) {
-                        if (value != null) {
-                          mainScreenKey.currentState?.setState(() {
-                            appSettings.windowButtonsOnLeft = value;
-                          });
-                          setState(() {
+                      });
+                    }
+                  })
+            ],
+          ),
+        ),
+        Padding(
+          padding: const EdgeInsets.only(left: 10.0, right: 10),
+          child: Row(
+            children: [
+              Text(AppLocalizations.of(context).get("window_controls_on_left")),
+              Checkbox(
+                  value: appSettings.windowButtonsOnLeft,
+                  onChanged: (value) {
+                    if (value != null) {
+                      mainScreenKey.currentState?.setState(() {
+                        appSettings.windowButtonsOnLeft = value;
+                      });
+                      setState(() {
 
-                          });
-                        }
-                      })
-                ],
-              ),
-            ),
+                      });
+                    }
+                  })
+            ],
+          ),
+        ),
         Visibility(
             visible: appSettings.prefersCustomTitleBar,
             child: SizedBox(
@@ -92,7 +92,7 @@ class LinuxTitleBarSettingsState extends ConsumerState<LinuxTitleBarSettings> {
                     return GestureDetector(
                       onTap: () async {
                         if(index == idList.length + 1) {
-                          final result = await FilePicker.platform.pickFiles(allowMultiple: true, type: FileType.custom);
+                          final result = await FilePicker.platform.pickFiles(allowMultiple: true, type: FileType.any);
                           if(result == null) {
                             return;
                           }
@@ -138,13 +138,11 @@ class LinuxTitleBarSettingsState extends ConsumerState<LinuxTitleBarSettings> {
                             .of(context)
                             .highlightColor, width: 2)) : null,
                         child: Center(
-                            child: IgnorePointer(
-                              ignoring: index != idList.length + 1,
-                                child: _Item(
-                                  index: index,
-                                  idList: idList,
-                                  themes: themes,
-                                ))),
+                            child: _Item(
+                              index: index,
+                              idList: idList,
+                              themes: themes,
+                            )),
                       ),
                     );
                   }),
@@ -164,20 +162,40 @@ class _Item extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     if(index == 0) {
-      return AdwaitaWindowButtons(
-        onClose: () async {},
-        padding: 0,
-        windowButtonsOnLeft: appSettings.windowButtonsOnLeft,
+      return Stack(
+        children: [
+          Center(
+            child: IgnorePointer(
+              ignoring: true,
+              child: AdwaitaWindowButtons(
+                onClose: () async {},
+                padding: 0,
+                windowButtonsOnLeft: appSettings.windowButtonsOnLeft,
+              ),
+            ),
+          ),
+          const Positioned.fill(child: MouseRegion())
+        ],
       );
     }
     if(index == idList.length + 1) {
       return const Icon(Icons.add_circle_outline);
     }
-    return AdaptiveLinuxWindowButtons(
-      theme: themes[idList[index - 1]],
-      onClose: () async {},
-      windowButtonsOnLeft: appSettings.windowButtonsOnLeft,
-      padding: 0,
+    return Stack(
+      children: [
+        Center(
+          child: IgnorePointer(
+            ignoring: true,
+            child: AdaptiveLinuxWindowButtons(
+              theme: themes[idList[index - 1]],
+              onClose: () async {},
+              windowButtonsOnLeft: appSettings.windowButtonsOnLeft,
+              padding: 0,
+            ),
+          ),
+        ),
+        const Positioned.fill(child: MouseRegion())
+      ],
     );
   }
 }

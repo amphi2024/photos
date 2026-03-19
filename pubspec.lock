@@ -474,10 +474,10 @@ packages:
     dependency: "direct main"
     description:
       name: linux_csd_buttons
-      sha256: dc5df174b2438d7d1f7ac3162fb7fe14d11c47c3767546c0361ebbafd547b4c2
+      sha256: "3cf0f5568b9640f2406ba9fbbde23278352200511663a781460b209240344def"
       url: "https://pub.dev"
     source: hosted
-    version: "1.1.0"
+    version: "1.1.1"
   logging:
     dependency: transitive
     description:
@@ -1183,10 +1183,10 @@ packages:
     dependency: transitive
     description:
       name: volume_controller
-      sha256: "966ed51695bed77823b7ab429854b63e616e414c31ed171147553c9ca5cc9672"
+      sha256: e82fd689bb8e1fe8e64be3fa5946ff8699058f8cf9f4c1679acdba20cda7f5bd
       url: "https://pub.dev"
     source: hosted
-    version: "3.4.2"
+    version: "3.3.3"
   wakelock_plus:
     dependency: transitive
     description:
