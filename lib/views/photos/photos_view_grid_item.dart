@@ -104,7 +104,7 @@ class PhotosViewGridItem extends ConsumerWidget {
                 progressColor: Theme.of(context).highlightColor),
           )
         ],
-        if (!photo.availableOnOffline) ... [
+        if (!photo.availableOnOffline && transfer == null) ... [
           Positioned(
             right: 5,
             bottom: 5,
