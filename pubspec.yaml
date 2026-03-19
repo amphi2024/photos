@@ -69,6 +69,11 @@ dependencies:
   modern_titlebar_buttons: ^1.1.2
   cupertino_icons: ^1.0.8
   linux_csd_buttons: ^1.1.1
+  flutter_context_menu:
+    git:
+      url: https://github.com/siar1234/flutter_context_menu.git
+      ref: 3ce1b6561e0ef5ca036ed42a0929e98631396691
+#    path: ../flutter_context_menu
 
 dev_dependencies:
   flutter_test:

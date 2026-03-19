@@ -263,6 +263,15 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "1.1.0"
+  flutter_context_menu:
+    dependency: "direct main"
+    description:
+      path: "."
+      ref: "3ce1b6561e0ef5ca036ed42a0929e98631396691"
+      resolved-ref: "3ce1b6561e0ef5ca036ed42a0929e98631396691"
+      url: "https://github.com/siar1234/flutter_context_menu.git"
+    source: git
+    version: "0.4.2"
   flutter_lints:
     dependency: "direct dev"
     description:
