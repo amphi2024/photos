@@ -94,10 +94,6 @@ class Photo {
     return photo;
   }
 
-  Future<void> removeDownload() async {
-
-  }
-
   Future<bool> verifySha256() async {
     return verifySha256Isolate(photoPath, sha256);
   }
