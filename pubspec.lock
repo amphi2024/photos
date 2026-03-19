@@ -267,8 +267,8 @@ packages:
     dependency: "direct main"
     description:
       path: "."
-      ref: "3ce1b6561e0ef5ca036ed42a0929e98631396691"
-      resolved-ref: "3ce1b6561e0ef5ca036ed42a0929e98631396691"
+      ref: ab8533f65a1b3b2b40602b2d4d3d07b6f12cdb3f
+      resolved-ref: ab8533f65a1b3b2b40602b2d4d3d07b6f12cdb3f
       url: "https://github.com/siar1234/flutter_context_menu.git"
     source: git
     version: "0.4.2"

@@ -122,7 +122,7 @@ List<Widget> photoSelectionActions({required BuildContext context, required Widg
         PopupMenuItem(
             child: Text(AppLocalizations.of(context).get("make_available_offline")),
             onTap: () {
-              makePhotosAvailableOffline(ref);
+              makePhotosAvailableOffline(ref: ref, selectedItems: selectedItems);
             }),
         PopupMenuItem(
             child: Text(AppLocalizations.of(context).get("make_online_only")),

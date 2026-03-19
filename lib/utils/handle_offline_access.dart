@@ -5,12 +5,10 @@ import 'package:photos/models/app_storage.dart';
 
 import '../channels/app_web_channel.dart';
 import '../providers/photos_provider.dart';
-import '../providers/providers.dart';
 
-void makePhotosAvailableOffline(WidgetRef ref) {
-  final selectedPhotos = ref.watch(selectedItemsProvider);
-  if (selectedPhotos != null) {
-    for (var id in selectedPhotos) {
+void makePhotosAvailableOffline({required WidgetRef ref, required List<String>? selectedItems}) {
+  if (selectedItems != null) {
+    for (var id in selectedItems) {
       appWebChannel.downloadPhotoFile(photo: ref.read(photosProvider).photos.get(id), ref: ref);
     }
   }

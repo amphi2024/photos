@@ -1,15 +1,19 @@
 import 'dart:io';
 
+import 'package:amphi/models/app_localizations.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_context_menu/flutter_context_menu.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:photos/models/app_cache.dart';
 import 'package:photos/providers/current_photo_id_provider.dart';
 import 'package:photos/providers/photos_provider.dart';
 import 'package:photos/providers/providers.dart';
+import 'package:photos/utils/handle_offline_access.dart';
 import 'package:photos/utils/photo_item_press_callback.dart';
 import 'package:photos/views/fragment_view_mixin.dart';
 import 'package:photos/views/photos/photos_view_grid_item.dart';
 import '../../components/nav_menu.dart';
+import '../../components/photo_info.dart';
 import '../../models/app_storage.dart';
 import '../../utils/screen_size.dart';
 
@@ -52,8 +56,7 @@ class _PhotosViewState extends ConsumerState<PhotosView> with FragmentViewMixin 
       onScaleEnd: (d) {
         if (scaleValue < 0.8 && axisCount < maximumAxisCount) {
           ref.read(axisCountProvider.notifier).set(axisCount + 1);
-        }
-        else if (scaleValue > 1.2 && axisCount > 1) {
+        } else if (scaleValue > 1.2 && axisCount > 1) {
           ref.read(axisCountProvider.notifier).set(axisCount - 1);
         }
         appCacheData.axisCount = axisCount;
@@ -72,12 +75,40 @@ class _PhotosViewState extends ConsumerState<PhotosView> with FragmentViewMixin 
               final photo = photos.get(id);
               return GestureDetector(
                 onLongPress: () async {
-                  if(Platform.isAndroid || Platform.isIOS) {
+                  if (Platform.isAndroid || Platform.isIOS) {
                     ref.read(selectedItemsProvider.notifier).startSelection();
                   }
                 },
                 onTap: () {
                   onPhotoPressed(ref: ref, currentPhotoId: currentPhotoId, photo: photo, context: context, selectedItems: selectedItems);
+                },
+                onSecondaryTapUp: (details) {
+                  showContextMenu(context,
+                      contextMenu: ContextMenu(padding: EdgeInsets.zero, position: details.globalPosition, entries: [
+                        TextMenuItem(
+                          onSelected: (value) {
+                            if(photo.availableOnOffline) {
+                              makePhotosOnlineOnly(ref: ref, selectedItems: selectedItems ?? [photo.id]);
+                            }
+                            else {
+                              makePhotosAvailableOffline(ref: ref, selectedItems: selectedItems ?? [photo.id]);
+                            }
+                          },
+                            label: Text(AppLocalizations.of(context).get(photo.availableOnOffline ? "make_online_only" : "make_available_offline"))),
+                        TextMenuItem(
+                            onSelected: (value) {
+                              showDialog(context: context, builder: (context) {
+                                return Dialog(
+                                  child: SizedBox(
+                                    width: 350,
+                                    height: 400,
+                                    child: PhotoInfo(id: photo.id),
+                                  ),
+                                );
+                              });
+                            },
+                            label: Text(AppLocalizations.of(context).get("@photo_details"), textAlign: TextAlign.start))
+                      ]));
                 },
                 child: PhotosViewGridItem(key: ValueKey(id), photo: photo),
               );
