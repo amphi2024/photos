@@ -1,29 +1,52 @@
-![logo](assets/logo/icon_256x256.png)
-
 # Amphi Photos
 
-Amphi Photos is a free and open-source, cross-platform photo gallery.
+[Website](https://amphi.site)
 
-It supports all popular image and video formats — no conversion required.
-You can organize your photos into albums and write personal notes directly on each photo.
-Once your gallery is set up, you can sync it across devices via a self-hosted server, letting you view your photos anywhere.
+[English](README.md) • [한국어](docs/README_KO.md)
 
-[Server Setup Guide](https://amphi.site/server)
+Amphi Photos is the elegant media hub you curate yourself. Open-source, self-hosted, and versatile for all platforms
 
-## Download
+![preview](preview-apple.png)
 
-- [Official Website](https://amphi.site/photos)
-- [GitHub Releases](https://github.com/amphi2024/photos/releases/latest)
-- [Play Store](https://play.google.com/store/apps/details?id=com.amphi.photos)
-- [iOS App Store](https://apps.apple.com/us/app/amphi-photos/id6751439356)
-- [Scoop](https://github.com/amphi2024/scoop-bucket)
-- [Homebrew](https://github.com/amphi2024/homebrew-amphi)
-- [AUR](https://aur.archlinux.org/packages/amphi-photos)
-- [Flatpak](https://github.com/amphi2024/amphi-flatpak)
-- [Snap Store](https://snapcraft.io/amphi-photos)
+## Installation
+
+### App
+
+**Android**: [Play Store](https://play.google.com/store/apps/details?id=com.amphi.photos) • [APK](https://github.com/amphi2024/photos/releases/latest)
+
+**iOS**: [App Store](https://apps.apple.com/app/amphi-photos/id6751439356)
+
+**Windows**: [Scoop](https://github.com/amphi2024/scoop-bucket) • [EXE](https://github.com/amphi2024/photos/releases/latest) • [ZIP](https://github.com/amphi2024/photos/releases/latest)
+
+**macOS**: [Homebrew](https://github.com/amphi2024/homebrew-amphi) • [DMG](https://github.com/amphi2024/photos/releases/latest)
+
+**Linux**: [AUR](https://aur.archlinux.org/packages/amphi-photos) • [Flatpak](https://github.com/amphi2024/amphi-flatpak) • [Snap](https://snapcraft.io/amphi-photos) • [DEB](https://github.com/amphi2024/photos/releases/latest) • [RPM](https://github.com/amphi2024/photos/releases/latest) • [TAR](https://github.com/amphi2024/photos/releases/latest)
+
+### Server
+
+You can easily set up a server by downloading the `.jar`file and running it with a JVM, like a Minecraft server.
+
+To get started: [Website](https://amphi.site/server) • [GitHub](https://github.com/amphi2024/server)
+
+### Other Apps
+
+If you set up a server, you can also sync data for other apps:
+- [Amphi Notes](https://github.com/amphi2024/notes)
+- [Amphi Music](https://github.com/amphi2024/music)
+- [Amphi Cloud](https://github.com/amphi2024/cloud)
 
 ## Contributing
 
-If you find a bug or notice any incorrect or awkward translations, please feel free to fix them.
-You can contribute by forking the repository, making your changes, and submitting a pull request.
-Thank you for helping improve Amphi Photos!
+We welcome contributions in many ways, such as:
+
+- Translating the app
+- Fixing bugs
+- Implementing missing features (especially TODO comments in the code)
+
+Please note that while we may not be able to accept every contribution, we truly appreciate your time and effort.
+
+To contribute:
+
+- Email us: support@amphi.site
+- Translate the app on [Weblate](https://hosted.weblate.org/projects/amphi-photos)
+- Create a pull request: [Contribution Guide](CONTRIBUTING.md)
